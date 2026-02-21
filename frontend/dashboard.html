@@ -2,8 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard</title>
+<title>Dashboard Pro</title>
 <link rel="stylesheet" href="app.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -17,26 +18,68 @@
 </div>
 
 <div class="main">
+
+<h2>Centre financier intelligent</h2>
+
+<!-- KPI -->
 <div class="grid">
+<div class="card">Solde <div class="big" id="kpiTotal"></div></div>
+<div class="card">Revenus <div class="big" id="kpiIncome"></div></div>
+<div class="card">Dépenses <div class="big" id="kpiExpense"></div></div>
+<div class="card">Score financier <div class="big" id="financeScore"></div></div>
+</div>
 
+<!-- Charts -->
+<div class="grid">
+<div class="card"><canvas id="flowChart"></canvas></div>
+<div class="card"><canvas id="categoryChart"></canvas></div>
+</div>
+
+<!-- Controls -->
 <div class="card">
-Solde total
-<div class="big" data-total></div>
+<input id="search" placeholder="Rechercher transaction">
+<select id="filterType">
+<option value="all">Tout</option>
+<option value="income">Revenus</option>
+<option value="expense">Dépenses</option>
+</select>
+<button onclick="resetFilters()">Reset</button>
 </div>
 
+<!-- Transactions -->
 <div class="card">
-Revenus
-<div class="big" data-income></div>
+<h3>Transactions en direct</h3>
+<div id="txLive"></div>
 </div>
 
+<!-- Budgets -->
+<div class="grid">
+<div class="card"><h3>Budgets actifs</h3><div id="budgetStatus"></div></div>
+<div class="card"><h3>Alertes</h3><div id="alerts"></div></div>
+</div>
+
+<!-- Goals -->
 <div class="card">
-Dépenses
-<div class="big" data-expense></div>
+<h3>Objectifs</h3>
+<div id="goalStatus"></div>
 </div>
 
+<!-- Forecast -->
+<div class="card">
+<h3>Prévision fin du mois</h3>
+<div id="forecast"></div>
 </div>
+
+<!-- Activity -->
+<div class="card">
+<h3>Timeline</h3>
+<div id="timeline"></div>
+</div>
+
 </div>
 
 <script type="module" src="app.js"></script>
+<script src="dashboard.js"></script>
+
 </body>
 </html>
