@@ -1,6 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Transactions</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="sidebar">
+<h1>Budget Pro</h1>
+<a href="dashboard.html">Dashboard</a>
+<a href="transactions.html">Transactions</a>
+<a href="budgets.html">Budgets</a>
+<a href="analytics.html">Analytics</a>
+<a href="goals.html">Goals</a>
+</div>
+
 <div class="main">
+
+<div class="card">
+<h2>Ajouter une transaction</h2>
+
 <input id="title" placeholder="Titre">
-<input id="amount" type="number">
+<input id="amount" type="number" placeholder="Montant">
 <input id="category" placeholder="Catégorie">
 
 <select id="type">
@@ -14,6 +36,12 @@
  category:category.value,
  type:type.value
 })">Ajouter</button>
-
-<div id="txList"></div>
 </div>
+
+<div class="list" id="txList"></div>
+
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
