@@ -1,11 +1,15 @@
 import { store } from "./store.js";
 
-function renderCharts() {
+async function renderCharts() {
     const pieCtx = document.getElementById("pie");
     const barCtx = document.getElementById("bar");
 
     // Vérification : si les éléments n'existent pas sur la page, on arrête
     if (!pieCtx || !barCtx) return;
+
+    // 0. CHARGEMENT ASYNCHRONE DES DONNÉES
+    // On attend que les transactions soient récupérées depuis le serveur
+    await store.fetchTransactions();
 
     // 1. CALCULS DES DONNÉES
     const income = store.transactions
@@ -17,14 +21,10 @@ function renderCharts() {
         .reduce((s, t) => s + Number(t.amount), 0);
 
     // 2. GESTION DU GRAPHIQUE PIE (DOUGHNUT)
-    // On détruit l'instance existante si elle existe
     const existingPie = Chart.getChart(pieCtx);
     if (existingPie) existingPie.destroy();
 
-    if (income === 0 && expense === 0) {
-        // Optionnel : afficher un texte si vide
-        console.log("Analytics: Aucune donnée pour le doughnut");
-    } else {
+    if (income > 0 || expense > 0) {
         new Chart(pieCtx, {
             type: "doughnut",
             data: {
@@ -38,9 +38,10 @@ function renderCharts() {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom' },
-                    title: { display: true, text: 'Répartition Revenus / Dépenses' }
+                    legend: { position: 'bottom', labels: { color: '#e5e7eb' } },
+                    title: { display: true, text: 'Répartition Revenus / Dépenses', color: '#fff' }
                 }
             }
         });
@@ -72,11 +73,20 @@ function renderCharts() {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false }
                 },
                 scales: {
-                    y: { beginAtZero: true }
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#9ca3af' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#9ca3af' }
+                    }
                 }
             }
         });
@@ -86,5 +96,5 @@ function renderCharts() {
 // Lancement au chargement du DOM
 document.addEventListener("DOMContentLoaded", renderCharts);
 
-// On expose la fonction pour pouvoir la rafraîchir si besoin
+// On expose la fonction pour pouvoir la rafraîchir dynamiquement
 window.refreshCharts = renderCharts;

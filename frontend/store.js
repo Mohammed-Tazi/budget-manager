@@ -1,23 +1,69 @@
-// store.js
-export const store = {
-    // Récupération des données avec conversion immédiate en types propres
-    transactions: JSON.parse(localStorage.getItem("transactions") || "[]").map(t => ({
-        ...t,
-        amount: Number(t.amount) || 0 // Sécurité : force le montant en nombre
-    })),
-    
-    budgets: JSON.parse(localStorage.getItem("budgets") || "{}"),
-    
-    goals: JSON.parse(localStorage.getItem("goals") || "[]").map(g => ({
-        ...g,
-        target: Number(g.target) || 0,
-        saved: Number(g.saved) || 0
-    })),
+const API_URL = "http://localhost:5000/api";
 
-    // Méthode de sauvegarde centralisée
-    save() {
-        localStorage.setItem("transactions", JSON.stringify(this.transactions));
-        localStorage.setItem("budgets", JSON.stringify(this.budgets));
-        localStorage.setItem("goals", JSON.stringify(this.goals));
+export const store = {
+    transactions: [],
+    budgets: [],
+    goals: [],
+
+    // 1. CHARGEMENT DES DONNÉES (Depuis MongoDB)
+    async fetchTransactions() {
+        try {
+            const res = await fetch(`${API_URL}/transactions`);
+            this.transactions = await res.json();
+        } catch (err) {
+            console.error("Erreur fetch transactions:", err);
+        }
+    },
+
+    async fetchBudgets() {
+        try {
+            const res = await fetch(`${API_URL}/budgets`);
+            this.budgets = await res.json();
+        } catch (err) {
+            console.error("Erreur fetch budgets:", err);
+        }
+    },
+
+    async fetchGoals() {
+        try {
+            const res = await fetch(`${API_URL}/goals`);
+            this.goals = await res.json();
+        } catch (err) {
+            console.error("Erreur fetch goals:", err);
+        }
+    },
+
+    // 2. SAUVEGARDE (Envoi au serveur)
+    async saveTransaction(t) {
+        const res = await fetch(`${API_URL}/transactions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(t)
+        });
+        return await res.json();
+    },
+
+    async deleteTransaction(id) {
+        await fetch(`${API_URL}/transactions/${id}`, {
+            method: 'DELETE'
+        });
+    },
+
+    async saveBudget(b) {
+        const res = await fetch(`${API_URL}/budgets`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(b)
+        });
+        return await res.json();
+    },
+
+    async saveGoal(g) {
+        const res = await fetch(`${API_URL}/goals`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(g)
+        });
+        return await res.json();
     }
 };
