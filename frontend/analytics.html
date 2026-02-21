@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Pro - Analyses</title>
+    <link rel="stylesheet" href="app.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="sidebar">
+    <h1>Budget Pro</h1>
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="transactions.html">Transactions</a>
+        <a href="budgets.html">Budgets</a>
+        <a href="analytics.html" class="active">Analytics</a>
+        <a href="goals.html">Goals</a>
+    </nav>
+</div>
+
+<div class="main">
+    <header>
+        <h2>Analyses Avancées</h2>
+        <p style="opacity: 0.7;">Visualisez la répartition de vos finances et vos habitudes de consommation.</p>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Structure Budgétaire</h3>
+            <div class="chart-container" style="position: relative; height:350px; width:100%;">
+                <canvas id="pie"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Dépenses par Catégorie</h3>
+            <div class="chart-container" style="position: relative; height:350px; width:100%;">
+                <canvas id="bar"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card" style="margin-top: 20px; text-align: center;">
+        <p style="opacity: 0.6;">Les graphiques se mettent à jour automatiquement à chaque nouvelle transaction.</p>
+    </div>
+</div>
+
+<script type="module" src="charts.js"></script>
+
+</body>
+</html>

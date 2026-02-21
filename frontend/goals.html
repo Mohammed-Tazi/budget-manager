@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Pro - Objectifs d'Épargne</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h1>Budget Pro</h1>
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="transactions.html">Transactions</a>
+        <a href="budgets.html">Budgets</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="goals.html" class="active">Goals</a>
+    </nav>
+</div>
+
+<div class="main">
+    <header>
+        <h2>Mes Objectifs Financiers</h2>
+        <p style="opacity: 0.7;">Planifiez vos projets et suivez votre progression.</p>
+    </header>
+
+    <div class="card">
+        <h3>🎯 Nouvel objectif</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+            <input id="name" type="text" placeholder="Ex: Voyage au Japon" style="flex: 2; min-width: 200px;">
+            <input id="target" type="number" placeholder="Montant cible (MAD)" style="flex: 1; min-width: 150px;">
+            <input id="saved" type="number" placeholder="Déjà épargné (Optionnel)" style="flex: 1; min-width: 150px;">
+            
+            <button onclick="addGoal({
+                name: document.getElementById('name').value,
+                target: document.getElementById('target').value,
+                saved: document.getElementById('saved').value || 0
+            })" style="flex: 1; cursor: pointer;">
+                Enregistrer
+            </button>
+        </div>
+    </div>
+
+    <div class="grid" id="goalList">
+        </div>
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

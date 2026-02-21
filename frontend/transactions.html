@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Pro - Gestion des Transactions</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h1>Budget Pro</h1>
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="transactions.html" class="active">Transactions</a>
+        <a href="budgets.html">Budgets</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="goals.html">Goals</a>
+    </nav>
+</div>
+
+<div class="main">
+    <header>
+        <h2>Gestion des Transactions</h2>
+        <p style="opacity: 0.7;">Enregistrez vos revenus et vos dépenses quotidiennes.</p>
+    </header>
+
+    <div class="card">
+        <h3>➕ Ajouter une opération</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+            <input id="title" type="text" placeholder="Titre (ex: Salaire, Courses...)" style="flex: 2; min-width: 200px;">
+            <input id="amount" type="number" placeholder="Montant (MAD)" style="flex: 1; min-width: 120px;">
+            <input id="category" type="text" placeholder="Catégorie (ex: Loisirs, Loyer...)" style="flex: 1; min-width: 150px;">
+            
+            <select id="type" style="flex: 1; min-width: 120px; padding: 10px;">
+                <option value="expense">🔴 Dépense</option>
+                <option value="income">🟢 Revenu</option>
+            </select>
+
+            <button onclick="addTransaction({
+                title: document.getElementById('title').value,
+                amount: document.getElementById('amount').value,
+                category: document.getElementById('category').value,
+                type: document.getElementById('type').value
+            })" style="flex: 1; cursor: pointer; min-width: 100px;">
+                Ajouter
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📜 Historique complet</h3>
+        <div id="txList" class="list-container">
+            </div>
+    </div>
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
