@@ -1,0 +1,19 @@
+<div class="main">
+<input id="title" placeholder="Titre">
+<input id="amount" type="number">
+<input id="category" placeholder="Catégorie">
+
+<select id="type">
+<option value="income">Revenu</option>
+<option value="expense">Dépense</option>
+</select>
+
+<button onclick="addTransaction({
+ title:title.value,
+ amount:+amount.value,
+ category:category.value,
+ type:type.value
+})">Ajouter</button>
+
+<div id="txList"></div>
+</div>
