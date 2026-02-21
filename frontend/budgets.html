@@ -1,34 +1,53 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Budgets</title>
-<link rel="stylesheet" href="app.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Pro - Gestion des Budgets</title>
+    <link rel="stylesheet" href="app.css">
 </head>
 <body>
 
 <div class="sidebar">
-<h1>Budget Pro</h1>
-<a href="dashboard.html">Dashboard</a>
-<a href="transactions.html">Transactions</a>
-<a href="budgets.html">Budgets</a>
-<a href="analytics.html">Analytics</a>
-<a href="goals.html">Goals</a>
+    <h1>Budget Pro</h1>
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="transactions.html">Transactions</a>
+        <a href="budgets.html" class="active">Budgets</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="goals.html">Goals</a>
+    </nav>
 </div>
 
 <div class="main">
+    <header>
+        <h2>Limites Budgétaires</h2>
+        <p style="opacity: 0.7;">Définissez des plafonds par catégorie pour contrôler vos dépenses.</p>
+    </header>
 
-<div class="card">
-<h2>Fixer un budget</h2>
-<input id="cat" placeholder="Catégorie">
-<input id="val" type="number" placeholder="Montant">
-<button onclick="setBudget(cat.value,+val.value)">Enregistrer</button>
-</div>
+    <div class="card">
+        <h3>🛡️ Fixer un budget mensuel</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+            <input id="cat" type="text" placeholder="Catégorie (ex: Nourriture, Loisirs...)" style="flex: 2; min-width: 200px;">
+            <input id="val" type="number" placeholder="Limite max (MAD)" style="flex: 1; min-width: 150px;">
+            
+            <button onclick="setBudget(
+                document.getElementById('cat').value,
+                document.getElementById('val').value
+            )" style="flex: 1; cursor: pointer;">
+                Enregistrer
+            </button>
+        </div>
+        <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.6;">
+            * Si la catégorie existe déjà, le montant sera mis à jour.
+        </p>
+    </div>
 
-<div class="grid" id="budgetList"></div>
-
+    <div class="grid" id="budgetList">
+        </div>
 </div>
 
 <script type="module" src="app.js"></script>
+
 </body>
 </html>

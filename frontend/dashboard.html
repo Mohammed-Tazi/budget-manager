@@ -1,85 +1,119 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard Pro</title>
-<link rel="stylesheet" href="app.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Pro - Dashboard</title>
+    <link rel="stylesheet" href="app.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
 <div class="sidebar">
-<h1>Budget Pro</h1>
-<a href="dashboard.html">Dashboard</a>
-<a href="transactions.html">Transactions</a>
-<a href="budgets.html">Budgets</a>
-<a href="analytics.html">Analytics</a>
-<a href="goals.html">Goals</a>
+    <h1>Budget Pro</h1>
+    <nav>
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="transactions.html">Transactions</a>
+        <a href="budgets.html">Budgets</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="goals.html">Goals</a>
+    </nav>
 </div>
 
 <div class="main">
+    <header>
+        <h2>Centre financier intelligent</h2>
+        <p id="currentDate" style="opacity: 0.7;"></p>
+    </header>
 
-<h2>Centre financier intelligent</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="label">Solde Total</span>
+            <div class="big" id="kpiTotal">0 MAD</div>
+        </div>
+        <div class="card">
+            <span class="label">Revenus</span>
+            <div class="big text-success" id="kpiIncome">0</div>
+        </div>
+        <div class="card">
+            <span class="label">Dépenses</span>
+            <div class="big text-danger" id="kpiExpense">0</div>
+        </div>
+        <div class="card">
+            <span class="label">Score Santé</span>
+            <div class="big" id="financeScore">--/100</div>
+        </div>
+    </div>
 
-<!-- KPI -->
-<div class="grid">
-<div class="card">Solde <div class="big" id="kpiTotal"></div></div>
-<div class="card">Revenus <div class="big" id="kpiIncome"></div></div>
-<div class="card">Dépenses <div class="big" id="kpiExpense"></div></div>
-<div class="card">Score financier <div class="big" id="financeScore"></div></div>
+    <div class="grid">
+        <div class="card">
+            <h3>Flux Mensuel</h3>
+            <div class="chart-container" style="position: relative; height:250px;">
+                <canvas id="flowChart"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Répartition Dépenses</h3>
+            <div class="chart-container" style="position: relative; height:250px;">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="card flex-between">
+        <div style="flex: 1; margin-right: 20px;">
+            <input type="text" id="search" placeholder="Rechercher une transaction (titre ou catégorie)..." style="width: 100%; padding: 10px;">
+        </div>
+        <select id="filterType" style="padding: 10px;">
+            <option value="all">Toutes les opérations</option>
+            <option value="income">Revenus uniquement</option>
+            <option value="expense">Dépenses uniquement</option>
+        </select>
+    </div>
+
+    <div class="card">
+        <h3>Transactions en direct</h3>
+        <div id="txLive" class="list-container">
+            </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Budgets actifs</h3>
+            <div id="budgetStatus"></div>
+        </div>
+        <div class="card">
+            <h3>Alertes & Notifications</h3>
+            <div id="alerts" class="alert-box"></div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Progression Objectifs</h3>
+            <div id="goalStatus"></div>
+        </div>
+        <div class="card">
+            <h3>Intelligence Artificielle</h3>
+            <p><strong>Prévision fin du mois :</strong></p>
+            <div id="forecast" class="forecast-box">Calcul de vos habitudes en cours...</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Historique d'activité</h3>
+        <div id="timeline"></div>
+    </div>
 </div>
 
-<!-- Charts -->
-<div class="grid">
-<div class="card"><canvas id="flowChart"></canvas></div>
-<div class="card"><canvas id="categoryChart"></canvas></div>
-</div>
-
-<!-- Controls -->
-<div class="card">
-<input id="search" placeholder="Rechercher transaction">
-<select id="filterType">
-<option value="all">Tout</option>
-<option value="income">Revenus</option>
-<option value="expense">Dépenses</option>
-</select>
-<button onclick="resetFilters()">Reset</button>
-</div>
-
-<!-- Transactions -->
-<div class="card">
-<h3>Transactions en direct</h3>
-<div id="txLive"></div>
-</div>
-
-<!-- Budgets -->
-<div class="grid">
-<div class="card"><h3>Budgets actifs</h3><div id="budgetStatus"></div></div>
-<div class="card"><h3>Alertes</h3><div id="alerts"></div></div>
-</div>
-
-<!-- Goals -->
-<div class="card">
-<h3>Objectifs</h3>
-<div id="goalStatus"></div>
-</div>
-
-<!-- Forecast -->
-<div class="card">
-<h3>Prévision fin du mois</h3>
-<div id="forecast"></div>
-</div>
-
-<!-- Activity -->
-<div class="card">
-<h3>Timeline</h3>
-<div id="timeline"></div>
-</div>
-
-</div>
+<script>
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    });
+</script>
 
 <script type="module" src="app.js"></script>
-<script src="dashboard.js"></script>
+<script type="module" src="dashboard.js"></script>
 
 </body>
 </html>
