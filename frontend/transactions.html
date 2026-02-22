@@ -5,51 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Pro - Transactions</title>
     <link rel="stylesheet" href="app.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
+<button class="mobile-nav-toggle" onclick="document.body.classList.toggle('nav-open')">☰</button>
+
 <div class="sidebar">
-    <h1>Budget Pro</h1>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="transactions.html" class="active">Transactions</a>
-    <a href="budgets.html">Budgets</a>
-    <a href="analytics.html">Analytics</a>
-    <a href="goals.html">Goals</a>
+    <div class="logo">
+        <h1>💎 Budget Pro</h1>
+    </div>
+    <nav>
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="transactions.html" class="active">💸 Transactions</a>
+        <a href="budgets.html">🛡️ Budgets</a>
+        <a href="analytics.html">📈 Analytics</a>
+        <a href="goals.html">🎯 Goals</a>
+    </nav>
+    <div class="sidebar-footer">v2.4.0 Premium</div>
 </div>
 
 <div class="main">
-    <header>
-        <h2>Gestion des Transactions</h2>
-        <p style="opacity: 0.7;">Enregistrez vos revenus et vos dépenses quotidiennes.</p>
+    <header class="main-header">
+        <div>
+            <h2>Gestion des Transactions</h2>
+            <p style="opacity: 0.7;">Enregistrez vos flux financiers en un clic.</p>
+        </div>
     </header>
 
-    <div class="card">
+    <div class="card transaction-form-card">
         <h3>➕ Ajouter une opération</h3>
-        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start;">
-            <div style="flex: 2; min-width: 200px;">
-                <input id="text" type="text" placeholder="Libellé (ex: Salaire, Courses...)">
-            </div>
-            <div style="flex: 1; min-width: 120px;">
-                <input id="amount" type="number" placeholder="Montant (MAD)">
-            </div>
-            <div style="flex: 1; min-width: 150px;">
-                <input id="category" type="text" placeholder="Catégorie">
-            </div>
-            <div style="flex: 1; min-width: 120px;">
-                <select id="type">
-                    <option value="expense">🔴 Dépense</option>
-                    <option value="income">🟢 Revenu</option>
-                </select>
-            </div>
-            <div style="flex: 0.5;">
-                <button onclick="window.handleAdd()">Ajouter</button>
-            </div>
+        <div class="transaction-form">
+            <input id="text" type="text" placeholder="Libellé (ex: Salaire, Courses...)" class="form-input flex-2">
+            <input id="amount" type="number" placeholder="Montant (MAD)" class="form-input flex-1">
+            <input id="category" type="text" placeholder="Catégorie" class="form-input flex-1">
+            <select id="type" class="form-input flex-1">
+                <option value="expense">🔴 Dépense</option>
+                <option value="income">🟢 Revenu</option>
+            </select>
+            <button onclick="window.handleAdd()" class="btn-primary">Ajouter</button>
         </div>
     </div>
 
     <div class="card" style="margin-top: 25px;">
         <h3>📜 Historique complet</h3>
-        <div id="txList">
+        <div id="txList" class="responsive-list">
             <p style="opacity:0.5; padding:20px;">Chargement des transactions...</p>
         </div>
     </div>

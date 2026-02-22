@@ -480,3 +480,85 @@ body {
     border-color: var(--primary-blue);
     color: var(--primary-blue);
 }
+/* --- CONFIGURATION MOBILE FIRST --- */
+
+/* 1. Layout Principal : On empile par défaut (Mobile) */
+body {
+    display: flex;
+    flex-direction: column; /* La sidebar sera en haut ou en bas sur mobile */
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* 2. Sidebar : On la transforme en barre de navigation horizontale sur mobile */
+.sidebar {
+    width: 100%;
+    height: auto;
+    position: relative; /* Plus fixée sur le côté */
+    padding: 10px 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap; /* Pour que les liens passent à la ligne si besoin */
+}
+
+/* 3. Zone principale : Prend toute la largeur */
+.main {
+    margin-left: 0; /* On annule la marge du PC */
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 4. Grilles et Cartes : 1 seule colonne sur mobile */
+.grid, .top-grid {
+    display: grid;
+    grid-template-columns: 1fr !important; /* Force une seule colonne */
+    gap: 15px;
+}
+
+/* --- ADAPTATION POUR TABLETTE ET PC (Écrans > 768px) --- */
+@media (min-width: 768px) {
+    body {
+        flex-direction: row; /* Sidebar à gauche, contenu à droite */
+    }
+
+    .sidebar {
+        width: 260px;
+        height: 100vh;
+        position: fixed;
+    }
+
+    .sidebar nav {
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .main {
+        margin-left: 260px; /* On remet l'espace pour la sidebar */
+        padding: 40px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .top-grid {
+        grid-template-columns: 2fr 1fr !important;
+    }
+}
+
+/* --- AJUSTEMENTS POUR PETITS ÉCRANS --- */
+input, button {
+    font-size: 16px; /* Évite le zoom automatique sur iPhone lors de la saisie */
+}
+
+.card {
+    padding: 15px;
+    overflow-x: auto; /* Permet aux tableaux de défiler si trop larges */
+}
