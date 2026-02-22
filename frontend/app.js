@@ -1,7 +1,8 @@
 import { store } from "./store.js";
 
-// --- INITIALISATION PRINCIPALE ---
+// --- INITIALISATION ---
 async function init() {
+    console.log("Initialisation du dashboard...");
     try {
         await Promise.all([
             store.fetchTransactions(),
@@ -11,9 +12,10 @@ async function init() {
         const tx = store.transactions || [];
         const budgets = store.budgets || [];
         
+        // Vérification de la page actuelle
         const isDashboard = document.getElementById('kpiTotal');
         const isTransactionPage = document.getElementById('txListFull') || document.getElementById('txList');
-        const isBudgetPage = document.getElementById('budgetList'); // ID pour la liste des budgets
+        const isBudgetPage = document.getElementById('budgetList');
 
         if (isDashboard) renderDashboard(tx);
         if (isTransactionPage) renderTransactionPage(tx);
@@ -24,7 +26,7 @@ async function init() {
     }
 }
 
-// --- GESTION DES BUDGETS (Correction) ---
+// --- LOGIQUE BUDGETS ---
 function renderBudgetPage(budgets, tx) {
     const listEl = document.getElementById("budgetList");
     if (!listEl) return;
@@ -35,7 +37,6 @@ function renderBudgetPage(budgets, tx) {
     }
 
     listEl.innerHTML = budgets.map(b => {
-        // Calcul du total dépensé pour cette catégorie
         const spent = tx
             .filter(t => t.category === b.category && t.type === 'expense')
             .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -44,7 +45,7 @@ function renderBudgetPage(budgets, tx) {
         const color = percent > 90 ? '#e74a3b' : percent > 70 ? '#f6c23e' : '#1cc88a';
 
         return `
-            <div class="card" style="margin-bottom: 15px;">
+            <div class="card" style="margin-bottom: 15px; border-left: 5px solid ${color}">
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <strong>${b.category}</strong>
                     <span>${spent.toLocaleString()} / ${b.limit.toLocaleString()} MAD</span>
@@ -57,132 +58,96 @@ function renderBudgetPage(budgets, tx) {
     }).join("");
 }
 
-// Action pour le bouton "Enregistrer" de la page Budgets
-window.handleSaveBudget = async function() {
-    const catEl = document.getElementById('budgetCategory'); // Assurez-vous d'avoir cet ID dans le HTML
-    const limitEl = document.getElementById('budgetLimit');   // Assurez-vous d'avoir cet ID dans le HTML
+// --- ACTIONS GLOBALES (Attachées à Window) ---
 
-    if (!catEl?.value || !limitEl?.value) {
+window.handleSaveBudget = async function() {
+    console.log("Tentative d'enregistrement du budget...");
+    const catEl = document.getElementById('budgetCategory');
+    const limitEl = document.getElementById('budgetLimit');
+
+    // DEBUG : Vérifie si les éléments existent dans le DOM
+    if (!catEl || !limitEl) {
+        console.error("ERREUR : Les IDs budgetCategory ou budgetLimit sont introuvables dans le HTML !");
+        return alert("Erreur technique : les champs de saisie sont introuvables.");
+    }
+
+    const category = catEl.value.trim();
+    const limit = Number(limitEl.value);
+
+    if (!category || !limit) {
         return alert("Veuillez remplir la catégorie et la limite.");
     }
 
     try {
-        await store.saveBudget({
-            category: catEl.value,
-            limit: Number(limitEl.value)
-        });
+        await store.saveBudget({ category, limit });
+        console.log("Budget enregistré !");
         catEl.value = "";
         limitEl.value = "";
-        await init();
+        await init(); 
     } catch (err) {
-        alert("Erreur lors de l'enregistrement du budget.");
+        console.error("Erreur store.saveBudget:", err);
+        alert("Erreur lors de l'enregistrement.");
     }
 };
 
-// --- LOGIQUE DU DASHBOARD ---
-function renderDashboard(tx) {
-    const income = tx.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
-    const expense = tx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
-    const balance = income - expense;
-
-    const update = (id, val) => { 
-        const el = document.getElementById(id);
-        if(el) el.innerText = val; 
-    };
-    
-    update("kpiTotal", `${balance.toLocaleString()} MAD`);
-    update("kpiIncome", `${income.toLocaleString()} MAD`);
-    update("kpiExpense", `${expense.toLocaleString()} MAD`);
-
-    const scoreEl = document.getElementById("financeScore");
-    if (scoreEl) {
-        const score = income > 0 ? Math.max(0, Math.min(100, Math.round((balance / income) * 100))) : 0;
-        scoreEl.innerText = `${score}/100`;
-        scoreEl.style.color = score > 70 ? "#1cc88a" : score > 40 ? "#f6c23e" : "#e74a3b";
-    }
-
-    renderFlowChart(income, expense);
-
-    const liveEl = document.getElementById("txLive");
-    if (liveEl) {
-        const recent = tx.slice().reverse().slice(0, 5);
-        liveEl.innerHTML = recent.length === 0 ? 
-            "<p style='opacity:0.5; padding:20px;'>Aucune activité.</p>" :
-            recent.map(t => `
-                <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                    <span>${t.text || 'Sans titre'}</span>
-                    <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
-                        ${t.type === 'income' ? '+' : '-'}${Math.abs(t.amount).toLocaleString()} MAD
-                    </b>
-                </div>
-            `).join("");
-    }
-}
-
-// --- LOGIQUE PAGE TRANSACTIONS ---
-function renderTransactionPage(tx) {
-    const listEl = document.getElementById("txListFull") || document.getElementById("txList");
-    if (!listEl) return;
-
-    if (tx.length === 0) {
-        listEl.innerHTML = "<p style='padding:20px; opacity:0.5;'>Aucune transaction enregistrée.</p>";
-        return;
-    }
-
-    listEl.innerHTML = tx.slice().reverse().map(t => `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <div>
-                <strong>${t.text || 'Sans titre'}</strong><br>
-                <small style="opacity:0.5;">${t.category || 'Général'}</small>
-            </div>
-            <div style="display:flex; align-items:center; gap:20px;">
-                <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
-                    ${t.type === 'income' ? '+' : '-'}${Math.abs(t.amount).toLocaleString()} MAD
-                </b>
-                <button onclick="window.handleDelete('${t._id || t.id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer; font-size:18px;">✕</button>
-            </div>
-        </div>
-    `).join("");
-}
-
-// --- ACTIONS GLOBALES ---
 window.handleAdd = async function() {
     const textEl = document.getElementById('text');
     const amountEl = document.getElementById('amount');
-    const categoryEl = document.getElementById('category');
     const typeEl = document.getElementById('type');
+    const catEl = document.getElementById('category');
 
-    if (!textEl?.value || !amountEl?.value) {
-        return alert("Veuillez remplir le libellé et le montant.");
-    }
+    if (!textEl?.value || !amountEl?.value) return alert("Champs requis.");
 
     try {
         await store.saveTransaction({
             text: textEl.value,
             amount: Number(amountEl.value),
-            category: categoryEl?.value || "Général",
-            type: typeEl?.value || "expense"
+            type: typeEl?.value || 'expense',
+            category: catEl?.value || 'Général'
         });
         textEl.value = "";
         amountEl.value = "";
-        if(categoryEl) categoryEl.value = "";
-        await init(); 
+        await init();
     } catch (err) {
-        alert("Erreur lors de l'ajout.");
+        alert("Erreur ajout transaction.");
     }
 };
 
 window.handleDelete = async function(id) {
-    if (!confirm("Supprimer cette transaction ?")) return;
+    if (!confirm("Supprimer ?")) return;
     try {
         await store.deleteTransaction(id);
         await init();
     } catch (err) {
-        alert("Erreur lors de la suppression.");
+        alert("Erreur suppression.");
     }
 };
 
-function renderFlowChart(income, expense) {
+// --- DASHBOARD & GRAPHIQUE ---
+function renderDashboard(tx) {
+    const income = tx.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
+    const expense = tx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+    const balance = income - expense;
+
+    const update = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
+    update("kpiTotal", `${balance.toLocaleString()} MAD`);
+    update("kpiIncome", `${income.toLocaleString()} MAD`);
+    update("kpiExpense", `${expense.toLocaleString()} MAD`);
+
+    renderFlowChart(income, expense);
+    
+    const liveEl = document.getElementById("txLive");
+    if (liveEl) {
+        liveEl.innerHTML = tx.slice().reverse().slice(0, 5).map(t => `
+            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #222;">
+                <span>${t.text}</span>
+                <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">${t.amount} MAD</b>
+            </div>
+        `).join("");
+    }
+}
+
+function renderFlowChart(inc, exp) {
     const ctx = document.getElementById("flowChart");
     if (!ctx) return;
     const existing = Chart.getChart(ctx);
@@ -191,14 +156,9 @@ function renderFlowChart(income, expense) {
         type: 'bar',
         data: {
             labels: ['Revenus', 'Dépenses'],
-            datasets: [{ data: [income, expense], backgroundColor: ['#1cc88a', '#e74a3b'], borderRadius: 5 }]
+            datasets: [{ data: [inc, exp], backgroundColor: ['#1cc88a', '#e74a3b'] }]
         },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } } }
-        }
+        options: { responsive: true, maintainAspectRatio: false }
     });
 }
 
