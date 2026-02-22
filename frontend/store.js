@@ -28,7 +28,6 @@ export const store = {
         });
     },
 
-    // Méthode ajoutée pour fixer les limites budgétaires
     async saveBudget(budget) {
         await fetch("/api/budgets", {
             method: "POST",
@@ -45,8 +44,21 @@ export const store = {
         });
     },
 
-    // --- SUPPRESSION ---
+    // --- SUPPRESSION (Correction : Routes spécifiques ajoutées) ---
+    
+    // Supprime une transaction
     async deleteTransaction(id) {
         await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+    },
+
+    // NOUVEAU : Supprime un budget
+    async deleteBudget(id) {
+        await fetch(`/api/budgets/${id}`, { method: "DELETE" });
+    },
+
+    // NOUVEAU : Supprime un objectif financier
+    async deleteGoal(id) {
+        const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Échec de la suppression de l'objectif");
     }
 };
