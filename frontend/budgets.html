@@ -31,12 +31,9 @@
             <input id="cat" type="text" placeholder="Catégorie (ex: Nourriture, Loisirs...)" style="flex: 2; min-width: 200px;">
             <input id="val" type="number" placeholder="Limite max (MAD)" style="flex: 1; min-width: 150px;">
             
-            <button onclick="setBudget(
-                document.getElementById('cat').value,
-                document.getElementById('val').value
-            )" style="flex: 1; cursor: pointer;">
-                Enregistrer
-            </button>
+          <button onclick="window.handleSaveBudget()" style="flex: 1; cursor: pointer;">
+    Enregistrer
+</button>
         </div>
         <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.6;">
             * Si la catégorie existe déjà, le montant sera mis à jour.
