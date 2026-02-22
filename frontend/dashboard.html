@@ -60,48 +60,27 @@
         </div>
     </div>
 
-    <div class="card flex-between">
-        <div style="flex: 1; margin-right: 20px;">
-            <input type="text" id="search" placeholder="Rechercher une transaction..." style="width: 100%; padding: 10px;">
-        </div>
-        <select id="filterType" style="padding: 10px;">
-            <option value="all">Toutes les opérations</option>
-            <option value="income">Revenus uniquement</option>
-            <option value="expense">Dépenses uniquement</option>
-        </select>
-    </div>
-
     <div class="card">
         <h3>Transactions en direct</h3>
-        <div id="txLive" class="list-container"></div>
+        <div id="txLive" class="list-container">
+            <p style="opacity:0.5; padding:15px;">Chargement des données...</p>
+        </div>
     </div>
 
     <div class="grid">
-        <div class="card">
-            <h3>Budgets actifs</h3>
-            <div id="budgetStatus"></div>
-        </div>
         <div class="card">
             <h3>Alertes & Notifications</h3>
-            <div id="alerts" class="alert-box"></div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h3>Progression Objectifs</h3>
-            <div id="goalStatus"></div>
+            <div id="alerts" class="alert-box">✅ Analyse des budgets en cours...</div>
         </div>
         <div class="card">
             <h3>Intelligence Artificielle</h3>
             <p><strong>Prévision fin du mois :</strong></p>
-            <div id="forecast" class="forecast-box">Calcul en cours...</div>
+            <div id="forecast" class="forecast-box" style="font-size: 1.5rem; font-weight: bold; margin-top: 10px; color: var(--accent);">Calcul en cours...</div>
         </div>
     </div>
 </div>
 
 <script>
-    // Affichage de la date actuelle
     document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', { 
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });

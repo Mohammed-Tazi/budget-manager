@@ -5,11 +5,14 @@ export const store = {
     budgets: [],
     goals: [],
 
+    // --- TRANSACTIONS ---
     async fetchTransactions() {
         try {
             const res = await fetch(`${API_URL}/transactions`);
             this.transactions = await res.json();
-        } catch (err) { console.error("Erreur:", err); }
+        } catch (err) { 
+            console.error("Erreur fetchTransactions:", err); 
+        }
     },
 
     async saveTransaction(t) {
@@ -21,13 +24,45 @@ export const store = {
         return await res.json();
     },
 
-    async fetchBudgets() {
-        const res = await fetch(`${API_URL}/budgets`);
-        this.budgets = await res.json();
+    async deleteTransaction(id) {
+        await fetch(`${API_URL}/transactions/${id}`, { method: 'DELETE' });
     },
 
+    // --- BUDGETS ---
+    async fetchBudgets() {
+        try {
+            const res = await fetch(`${API_URL}/budgets`);
+            this.budgets = await res.json();
+        } catch (err) {
+            console.error("Erreur fetchBudgets:", err);
+        }
+    },
+
+    async saveBudget(b) {
+        const res = await fetch(`${API_URL}/budgets`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(b)
+        });
+        return await res.json();
+    },
+
+    // --- OBJECTIFS (GOALS) ---
     async fetchGoals() {
-        const res = await fetch(`${API_URL}/goals`);
-        this.goals = await res.json();
+        try {
+            const res = await fetch(`${API_URL}/goals`);
+            this.goals = await res.json();
+        } catch (err) {
+            console.error("Erreur fetchGoals:", err);
+        }
+    },
+
+    async saveGoal(g) {
+        const res = await fetch(`${API_URL}/goals`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(g)
+        });
+        return await res.json();
     }
 };

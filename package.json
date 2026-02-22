@@ -1,16 +1,11 @@
 {
-  "name": "budget-app",
+  "name": "budget-app-root",
   "version": "1.0.0",
-  "description": "Full stack budget management app.",
+  "description": "Root configuration for Vercel",
   "main": "backend/server.js",
-  "scripts": {
-    "start": "node backend/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "mongoose": "^9.2.1"
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongoose": "^7.0.0"
   }
 }

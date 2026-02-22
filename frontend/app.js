@@ -6,51 +6,23 @@ import { store } from "./store.js";
 
 // Ajouter une transaction
 window.addTransaction = async (t) => {
-    if (!t.title || !t.amount) return alert("Veuillez remplir le titre et le montant.");
+    // CORRECTION : On utilise "text" pour correspondre au schéma server.js
+    if (!t.text || !t.amount) return alert("Veuillez remplir le libellé et le montant.");
     
     const newTx = {
-        ...t,
+        text: t.text, // Changé de title à text
         amount: Number(t.amount),
         category: t.category || "Général",
+        type: t.type || "expense",
         date: new Date().toISOString()
     };
 
     try {
-        await store.saveTransaction(newTx); // Appelle l'API POST
-        clearInputs(["title", "amount", "category"]);
-        await refreshData(); // Recharge les données depuis le serveur
+        await store.saveTransaction(newTx); 
+        clearInputs(["text", "amount", "category"]); // ID mis à jour
+        await refreshData(); 
     } catch (err) {
-        alert("Erreur lors de l'enregistrement");
-    }
-};
-
-// Fixer un budget
-window.setBudget = async (cat, val) => {
-    if (!cat || !val) return alert("Remplissez tous les champs.");
-    
-    try {
-        await store.saveBudget({ category: cat, limit: Number(val) });
-        clearInputs(["cat", "val"]);
-        await refreshData();
-    } catch (err) {
-        console.error(err);
-    }
-};
-
-// Ajouter un objectif
-window.addGoal = async (g) => {
-    if (!g.name || !g.target) return alert("Remplissez tous les champs.");
-    
-    try {
-        await store.saveGoal({
-            ...g,
-            target: Number(g.target),
-            saved: Number(g.saved || 0)
-        });
-        clearInputs(["name", "target", "saved"]);
-        await refreshData();
-    } catch (err) {
-        console.error(err);
+        alert("Erreur lors de l'enregistrement : " + err.message);
     }
 };
 
@@ -58,7 +30,7 @@ window.addGoal = async (g) => {
 window.deleteTransaction = async (id) => {
     if(confirm("Supprimer cette transaction ?")) {
         try {
-            await store.deleteTransaction(id); // Appelle l'API DELETE
+            await store.deleteTransaction(id); 
             await refreshData();
         } catch (err) {
             alert("Erreur lors de la suppression");
@@ -70,17 +42,19 @@ window.deleteTransaction = async (id) => {
    2. LOGIQUE DE RENDU (UI)
 ========================================= */
 
-// Fonction centrale pour rafraîchir l'interface
 async function refreshData() {
-    await store.fetchTransactions(); // On récupère les dernières data du serveur
-    // Tu peux aussi ajouter store.fetchBudgets() et store.fetchGoals() ici
-    render();
+    try {
+        await store.fetchTransactions();
+        // On peut ajouter store.fetchBudgets() ici plus tard
+        render();
+    } catch (err) {
+        console.error("Échec du chargement des données", err);
+    }
 }
 
 window.render = () => {
     const stats = calculateTotals();
 
-    // Mise à jour KPI
     const update = (id, val, isCurrency = false) => {
         const el = document.getElementById(id);
         if (el) el.innerText = val.toLocaleString() + (isCurrency ? " MAD" : "");
@@ -91,8 +65,6 @@ window.render = () => {
     update("kpiExpense", stats.expense);
 
     renderTransactionsList();
-    renderBudgetsUI();
-    renderGoalsUI();
 };
 
 function calculateTotals() {
@@ -104,35 +76,29 @@ function calculateTotals() {
     return { income, expense, total: income - expense };
 }
 
-// Liste des transactions (Correction : utilise t._id venant de MongoDB)
 function renderTransactionsList() {
     const el = document.getElementById("txList") || document.getElementById("txLive");
     if (!el) return;
     
     if (store.transactions.length === 0) {
-        el.innerHTML = `<p style="opacity:0.5; padding:15px;">Aucune donnée disponible.</p>`;
+        el.innerHTML = `<p style="opacity:0.5; padding:15px;">Aucune transaction enregistrée.</p>`;
         return;
     }
 
     el.innerHTML = store.transactions.map((t) => `
         <div class="card transaction-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <div>
-                <strong>${t.title}</strong> 
-                <br><small style="opacity:0.7">${t.category || 'Général'}</small>
+                <strong>${t.text}</strong> <br><small style="opacity:0.7">${t.category || 'Général'}</small>
             </div>
             <div style="text-align: right; display:flex; align-items:center; gap:15px;">
                 <span style="font-weight:bold; color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
                     ${t.type === 'income' ? '+' : '-'}${Number(t.amount).toLocaleString()} MAD
                 </span>
-                <button onclick="deleteTransaction('${t._id}')" class="btn-del">✕</button>
+                <button onclick="deleteTransaction('${t._id}')" class="btn-del" style="background:none; border:none; color:#e74a3b; cursor:pointer;">✕</button>
             </div>
         </div>
-    `).reverse().join("");
+    `).join(""); // Retrait du .reverse() car le backend trie déjà par date
 }
-
-/* --- Fonctions Budgets et Goals identiques à ta version précédente --- */
-function renderBudgetsUI() { /* ... ta logique existante ... */ }
-function renderGoalsUI() { /* ... ta logique existante ... */ }
 
 function clearInputs(ids) {
     ids.forEach(id => {
@@ -141,5 +107,4 @@ function clearInputs(ids) {
     });
 }
 
-// Initialisation au chargement
 document.addEventListener("DOMContentLoaded", refreshData);
