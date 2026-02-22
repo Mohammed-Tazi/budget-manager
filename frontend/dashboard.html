@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Pro - Dashboard</title>
     <link rel="stylesheet" href="app.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -25,23 +26,44 @@
         </header>
 
         <div class="grid">
-            <div class="card"><span>Solde Total</span><div class="big" id="kpiTotal">0 MAD</div></div>
-            <div class="card"><span>Revenus</span><div class="big" id="kpiIncome" style="color:#1cc88a">0</div></div>
-            <div class="card"><span>Dépenses</span><div class="big" id="kpiExpense" style="color:#e74a3b">0</div></div>
-            <div class="card"><span>Score Santé</span><div class="big" id="financeScore">--/100</div></div>
+            <div class="card">
+                <span>Solde Total</span>
+                <div class="big" id="kpiTotal">Chargement...</div>
+            </div>
+            <div class="card">
+                <span>Revenus</span>
+                <div class="big" id="kpiIncome" style="color:#1cc88a">0 MAD</div>
+            </div>
+            <div class="card">
+                <span>Dépenses</span>
+                <div class="big" id="kpiExpense" style="color:#e74a3b">0 MAD</div>
+            </div>
+            <div class="card">
+                <span>Score Santé</span>
+                <div class="big" id="financeScore">--/100</div>
+            </div>
         </div>
 
         <div class="grid">
             <div class="card">
                 <h3>Flux Financier</h3>
-                <div style="height: 250px;"><canvas id="flowChart"></canvas></div>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="flowChart"></canvas>
+                </div>
             </div>
+
             <div class="card">
                 <h3>Dernières Activités</h3>
-                <div id="txLive"></div>
+                <div id="txLive">
+                    <p style="opacity:0.5; padding:20px;">Chargement des activités...</p>
+                </div>
+                <div style="margin-top: 15px; text-align: center;">
+                    <a href="transactions.html" style="font-size: 0.9em; color: #3b82f6; text-decoration: none;">Voir tout l'historique →</a>
+                </div>
             </div>
         </div>
     </div>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
