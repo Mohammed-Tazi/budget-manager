@@ -1,11 +1,11 @@
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api"; // Changement crucial pour Vercel
 
 export const store = {
     transactions: [],
     budgets: [],
     goals: [],
 
-    // 1. CHARGEMENT DES DONNÉES (Depuis MongoDB)
+    // 1. CHARGEMENT DES DONNÉES
     async fetchTransactions() {
         try {
             const res = await fetch(`${API_URL}/transactions`);
@@ -33,7 +33,7 @@ export const store = {
         }
     },
 
-    // 2. SAUVEGARDE (Envoi au serveur)
+    // 2. SAUVEGARDE
     async saveTransaction(t) {
         const res = await fetch(`${API_URL}/transactions`, {
             method: 'POST',
