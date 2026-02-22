@@ -5,8 +5,8 @@
     { "src": "frontend/**", "use": "@vercel/static" }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "backend/server.js" },
-    { "source": "/(.*)", "destination": "frontend/$1" },
-    { "source": "/", "destination": "frontend/dashboard.html" }
+    { "source": "/api/(.*)", "destination": "/backend/server.js" },
+    { "source": "/", "destination": "/frontend/dashboard.html" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
   ]
 }
