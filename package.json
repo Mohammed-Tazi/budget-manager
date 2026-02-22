@@ -1,23 +1,12 @@
 {
   "name": "budget-app",
   "version": "1.0.0",
-  "description": "Full stack budget management app.\r Frontend + Backend + MongoDB + Vercel",
-  "main": "index.js",
+  "description": "Full stack budget management app.",
+  "main": "backend/server.js",
   "scripts": {
+    "start": "node backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Mohammed-Tazi/budget-manager.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/Mohammed-Tazi/budget-manager/issues"
-  },
-  "homepage": "https://github.com/Mohammed-Tazi/budget-manager#readme",
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
