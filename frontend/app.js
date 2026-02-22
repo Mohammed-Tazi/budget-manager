@@ -1,6 +1,6 @@
 import { store } from "./store.js";
 
-// --- CONSTANTES & UTILITAIRES ---
+// --- UTILITAIRES ---
 const formatMAD = (amount) => new Intl.NumberFormat('fr-MA', { 
     style: 'currency', 
     currency: 'MAD',
@@ -13,7 +13,6 @@ async function init() {
     if (mainEl) mainEl.style.opacity = "0.5"; 
 
     try {
-        // Chargement initial des données depuis votre store actuel
         await Promise.all([
             store.fetchTransactions(),
             store.fetchBudgets(),
@@ -21,14 +20,14 @@ async function init() {
         ]);
         refreshUI();
     } catch (err) {
-        console.error("🚀 Erreur d'initialisation :", err);
+        console.error("🚀 Erreur initialisation :", err);
     } finally {
         if (mainEl) mainEl.style.opacity = "1";
     }
 }
 
 function refreshUI() {
-    updateDashboard(); // Gère les totaux et le graphique
+    updateDashboard();
     renderGoals();
     renderTransactions();
     renderBudgets();
@@ -41,7 +40,7 @@ function renderBudgets() {
     if (!listEl) return;
 
     listEl.innerHTML = (store.budgets || []).map(b => `
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-left: 4px solid #3b82f6;">
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-left: 4px solid #3b82f6; padding: 15px;">
             <div>
                 <strong style="text-transform: capitalize;">${b.category}</strong><br>
                 <small style="opacity: 0.7;">Limite : ${formatMAD(b.limit)}</small>
@@ -79,111 +78,82 @@ function renderTransactions() {
 
     listEl.innerHTML = (store.transactions || []).map(t => `
         <div style="display:flex; justify-content:space-between; padding: 12px; border-bottom: 1px solid #ffffff11;">
-            <span>${t.text} <br><small style="opacity:0.5">${t.category || 'Général'}</small></span>
+            <span>${t.text || 'Sans titre'} <br><small style="opacity:0.5">${t.category || 'Général'}</small></span>
             <div style="text-align: right;">
                 <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
                     ${t.type === 'income' ? '+' : '-'} ${formatMAD(t.amount)}
                 </b>
+                <button onclick="handleDelete('${t._id || t.id}', 'transaction')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; margin-left:8px;">✕</button>
             </div>
         </div>
     `).join("");
 }
 
-// --- LOGIQUE DASHBOARD & CHART ---
+// --- LOGIQUE DASHBOARD ---
 
 function updateDashboard() {
     const tx = store.transactions || [];
     const income = tx.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
     const expense = tx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
-    const total = income - expense;
 
     const kpiTotal = document.getElementById("kpiTotal");
-    if(kpiTotal) {
-        kpiTotal.innerText = formatMAD(total);
-        kpiTotal.style.color = total >= 0 ? "#1cc88a" : "#e74a3b";
-    }
+    if(kpiTotal) kpiTotal.innerText = formatMAD(income - expense);
     
-    // Appel de la fonction graphique (corrigée ci-dessous)
-    updateChart(income, expense);
+    const kpiIncome = document.getElementById("kpiIncome");
+    if(kpiIncome) kpiIncome.innerText = formatMAD(income);
+
+    const kpiExpense = document.getElementById("kpiExpense");
+    if(kpiExpense) kpiExpense.innerText = formatMAD(expense);
+
+    updateCharts(income, expense, tx);
 }
 
-function updateChart(income, expense) {
-    const ctx = document.getElementById('flowChart') || document.getElementById('pie');
-    if (!ctx) return;
-
-    const existingChart = Chart.getChart(ctx);
-    if (existingChart) existingChart.destroy();
-
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Revenus', 'Dépenses'],
-            datasets: [{
-                data: [income, expense],
-                backgroundColor: ['#1cc88a', '#e74a3b'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '80%',
-            plugins: { legend: { display: false } }
-        }
-    });
+function updateCharts(income, expense, tx) {
+    const flowCtx = document.getElementById("flowChart");
+    if (flowCtx) {
+        const existing = Chart.getChart(flowCtx);
+        if (existing) existing.destroy();
+        new Chart(flowCtx, {
+            type: "bar",
+            data: {
+                labels: ["Revenus", "Dépenses"],
+                datasets: [{ data: [income, expense], backgroundColor: ["#1cc88a", "#e74a3b"], borderRadius: 8 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
 }
 
 // --- ACTIONS GLOBALES ---
 
-window.handleSaveBudget = async function() {
-    const catEl = document.getElementById('cat');
-    const valEl = document.getElementById('val');
-
-    if (!catEl?.value || !valEl?.value) return alert("⚠️ Remplissez les champs !");
-
-    try {
-        await store.saveBudget({ category: catEl.value, limit: Number(valEl.value) });
-        catEl.value = ""; valEl.value = "";
-        await init();
-    } catch (err) { alert("Erreur lors de l'enregistrement"); }
-};
-
-window.handleSaveGoal = async function() {
-    const titleEl = document.getElementById('goalName');
-    const targetEl = document.getElementById('goalTarget');
-    const currentEl = document.getElementById('goalSaved');
-
-    if (!titleEl?.value || !targetEl?.value) return alert("⚠️ Nom et objectif requis.");
-
-    try {
-        await store.saveGoal({ 
-            title: titleEl.value, 
-            target: Number(targetEl.value), 
-            current: Number(currentEl.value || 0) 
-        });
-        titleEl.value = ""; targetEl.value = ""; currentEl.value = "";
-        await init();
-    } catch (err) { alert("Erreur lors de l'enregistrement"); }
-};
-
 window.handleDelete = async function(id, type) {
     if (!id || id === 'undefined') return;
-    if (!confirm("Voulez-vous vraiment supprimer cet élément ?")) return;
+    if (!confirm("🗑️ Supprimer cet élément ?")) return;
 
     try {
         if (type === 'goal') await store.deleteGoal(id);
         else if (type === 'budget') await store.deleteBudget(id);
         else await store.deleteTransaction(id);
-        await init();
-    } catch (err) { alert("Erreur lors de la suppression."); }
+        await init(); 
+    } catch (err) {
+        alert("Erreur lors de la suppression.");
+    }
+};
+
+window.handleSaveBudget = async function() {
+    const catEl = document.getElementById('cat');
+    const valEl = document.getElementById('val');
+    if (!catEl?.value || !valEl?.value) return alert("Champs requis");
+
+    await store.saveBudget({ category: catEl.value, limit: Number(valEl.value) });
+    catEl.value = ""; valEl.value = "";
+    await init();
 };
 
 window.handleReset = async function() {
-    if (!confirm("⚠️ Tout réinitialiser ?")) return;
-    try {
-        await store.resetAllData();
-        await init();
-    } catch (err) { alert("Erreur reset"); }
+    if (!confirm("⚠️ Tout effacer ?")) return;
+    await store.resetAllData();
+    await init();
 };
 
 document.addEventListener("DOMContentLoaded", init);
