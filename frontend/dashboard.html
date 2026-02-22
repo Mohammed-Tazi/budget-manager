@@ -12,11 +12,11 @@
 <div class="sidebar">
     <h1>Budget Pro</h1>
     <nav>
-        <a href="dashboard.html" class="active">Dashboard</a>
-        <a href="transactions.html">Transactions</a>
-        <a href="budgets.html">Budgets</a>
-        <a href="analytics.html">Analytics</a>
-        <a href="goals.html">Goals</a>
+        <a href="/" class="active">Dashboard</a>
+        <a href="/transactions">Transactions</a>
+        <a href="/budgets">Budgets</a>
+        <a href="/analytics">Analytics</a>
+        <a href="/goals">Goals</a>
     </nav>
 </div>
 
@@ -62,7 +62,7 @@
 
     <div class="card flex-between">
         <div style="flex: 1; margin-right: 20px;">
-            <input type="text" id="search" placeholder="Rechercher une transaction (titre ou catégorie)..." style="width: 100%; padding: 10px;">
+            <input type="text" id="search" placeholder="Rechercher une transaction..." style="width: 100%; padding: 10px;">
         </div>
         <select id="filterType" style="padding: 10px;">
             <option value="all">Toutes les opérations</option>
@@ -73,8 +73,7 @@
 
     <div class="card">
         <h3>Transactions en direct</h3>
-        <div id="txLive" class="list-container">
-            </div>
+        <div id="txLive" class="list-container"></div>
     </div>
 
     <div class="grid">
@@ -96,23 +95,18 @@
         <div class="card">
             <h3>Intelligence Artificielle</h3>
             <p><strong>Prévision fin du mois :</strong></p>
-            <div id="forecast" class="forecast-box">Calcul de vos habitudes en cours...</div>
+            <div id="forecast" class="forecast-box">Calcul en cours...</div>
         </div>
-    </div>
-
-    <div class="card">
-        <h3>Historique d'activité</h3>
-        <div id="timeline"></div>
     </div>
 </div>
 
 <script>
+    // Affichage de la date actuelle
     document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', { 
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
 </script>
 
-<script type="module" src="app.js"></script>
 <script type="module" src="dashboard.js"></script>
 
 </body>
