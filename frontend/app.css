@@ -43,75 +43,57 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* =========================
-   SIDEBAR (CORRIGÉ)
+   SIDEBAR (NETTOYÉE)
 ========================= */
 .sidebar {
     width: 260px;
     background: var(--bg-2);
     padding: 40px 20px;
     display: flex;
-    flex-direction: column; /* Aligne les éléments verticalement */
-    gap: 10px; /* Espace entre les liens */
+    flex-direction: column; /* Aligne les liens en colonne */
+    gap: 12px;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     position: fixed;
     height: 100vh;
     left: 0;
     top: 0;
+    z-index: 1000;
 }
 
 .sidebar h1 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--accent);
     margin-bottom: 30px;
     padding-left: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 800;
 }
 
 .sidebar a {
     text-decoration: none;
     color: var(--muted);
-    padding: 15px 20px;
-    border-radius: 12px;
+    padding: 14px 20px;
+    border-radius: 14px;
     transition: var(--transition);
     font-weight: 500;
-    display: block; /* Force le lien à prendre toute la largeur disponible */
+    display: block; /* Prend toute la largeur */
     width: 100%;
 }
 
 .sidebar a:hover, .sidebar a.active {
     background: var(--accent-soft);
     color: white;
-}
-
-.sidebar h1 {
-    font-size: 1.4rem;
-    color: var(--accent);
-    margin-bottom: 25px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.sidebar a {
-    text-decoration: none;
-    color: var(--muted);
-    padding: 14px 16px;
-    border-radius: 14px;
-    transition: var(--transition);
-    font-weight: 500;
-}
-
-.sidebar a:hover, .sidebar a.active {
-    background: var(--accent-soft);
-    color: white;
-    transform: translateX(5px);
+    transform: translateX(5px); /* Petit effet de glissement au survol */
 }
 
 /* =========================
    MAIN CONTENT
 ========================= */
 .main {
-    margin-left: 270px;
+    margin-left: 260px; /* Doit correspondre à la largeur de la sidebar */
     padding: 40px;
-    width: 100%;
+    width: calc(100% - 260px);
     max-width: 1400px;
 }
 
@@ -157,30 +139,8 @@ header h2 { font-size: 2rem; color: white; margin-bottom: 5px; }
 }
 
 /* =========================
-   ELEMENTS DE LISTE & LIGNES
+   FORMULAIRES & BOUTONS
 ========================= */
-.flex-between { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-}
-
-.transaction-row {
-    padding: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: var(--transition);
-}
-
-.transaction-row:last-child { border-bottom: none; }
-
-/* =========================
-   FORMULAIRES
-========================= */
-input, select, button {
-    font-family: inherit;
-    font-size: 0.95rem;
-}
-
 input, select {
     width: 100%;
     padding: 12px 16px;
@@ -189,12 +149,12 @@ input, select {
     background: var(--bg-2);
     color: white;
     transition: var(--transition);
+    margin-bottom: 15px;
 }
 
 input:focus, select:focus {
     outline: none;
     border-color: var(--accent);
-    background: var(--bg);
 }
 
 button {
@@ -206,6 +166,7 @@ button {
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
+    width: 100%;
 }
 
 button:hover {
@@ -213,69 +174,22 @@ button:hover {
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
-.btn-del {
-    background: none;
-    color: var(--bad);
-    padding: 5px;
-    font-size: 1.2rem;
-    opacity: 0.6;
-}
-
-.btn-del:hover {
-    opacity: 1;
-    transform: scale(1.1);
-    background: none;
-    box-shadow: none;
-}
-
 /* =========================
-   PROGRESS BARS (BUDGETS/GOALS)
-========================= */
-.progress-bg {
-    height: 10px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 10px;
-    margin-top: 10px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* =========================
-   COULEURS SÉMANTIQUES
+   COULEURS SÉMANTIQUES & ANIM
 ========================= */
 .text-success { color: var(--good) !important; }
 .text-danger { color: var(--bad) !important; }
-.text-muted { color: var(--muted); }
 
-/* =========================
-   ANIMATIONS & RESPONSIVE
-========================= */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 1024px) {
     .sidebar { width: 80px; padding: 20px 10px; }
     .sidebar h1, .sidebar a span { display: none; }
-    .main { margin-left: 80px; padding: 20px; }
-}
-
-@media (max-width: 768px) {
-    body { flex-direction: column; }
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        flex-direction: row;
-        padding: 10px;
-        overflow-x: auto;
-    }
-    .main { margin-left: 0; padding: 15px; }
-    .big { font-size: 1.8rem; }
+    .main { margin-left: 80px; width: calc(100% - 80px); }
 }
