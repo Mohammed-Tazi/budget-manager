@@ -10,7 +10,6 @@
     { "source": "/transactions", "destination": "/frontend/transactions.html" },
     { "source": "/budgets", "destination": "/frontend/budgets.html" },
     { "source": "/analytics", "destination": "/frontend/analytics.html" },
-    { "source": "/goals", "destination": "/frontend/goals.html" },
-    { "source": "/(.*)", "destination": "/frontend/$1" }
+    { "source": "/goals", "destination": "/frontend/goals.html" }
   ]
 }

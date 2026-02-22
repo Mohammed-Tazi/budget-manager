@@ -1,11 +1,11 @@
-const API_URL = "/api"; // Changement crucial pour Vercel
+const API_URL = "/api"; // Changement crucial pour que Vercel trouve le backend
 
 export const store = {
     transactions: [],
     budgets: [],
     goals: [],
 
-    // 1. CHARGEMENT DES DONNÉES
+    // 1. CHARGEMENT DES DONNÉES (Depuis MongoDB via le serveur)
     async fetchTransactions() {
         try {
             const res = await fetch(`${API_URL}/transactions`);
@@ -33,37 +33,53 @@ export const store = {
         }
     },
 
-    // 2. SAUVEGARDE
+    // 2. SAUVEGARDE ET ACTIONS (Envoi au serveur Vercel)
     async saveTransaction(t) {
-        const res = await fetch(`${API_URL}/transactions`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(t)
-        });
-        return await res.json();
+        try {
+            const res = await fetch(`${API_URL}/transactions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(t)
+            });
+            return await res.json();
+        } catch (err) {
+            console.error("Erreur lors de l'ajout de la transaction:", err);
+        }
     },
 
     async deleteTransaction(id) {
-        await fetch(`${API_URL}/transactions/${id}`, {
-            method: 'DELETE'
-        });
+        try {
+            await fetch(`${API_URL}/transactions/${id}`, {
+                method: 'DELETE'
+            });
+        } catch (err) {
+            console.error("Erreur lors de la suppression:", err);
+        }
     },
 
     async saveBudget(b) {
-        const res = await fetch(`${API_URL}/budgets`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(b)
-        });
-        return await res.json();
+        try {
+            const res = await fetch(`${API_URL}/budgets`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(b)
+            });
+            return await res.json();
+        } catch (err) {
+            console.error("Erreur lors de la sauvegarde du budget:", err);
+        }
     },
 
     async saveGoal(g) {
-        const res = await fetch(`${API_URL}/goals`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(g)
-        });
-        return await res.json();
+        try {
+            const res = await fetch(`${API_URL}/goals`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(g)
+            });
+            return await res.json();
+        } catch (err) {
+            console.error("Erreur lors de la sauvegarde de l'objectif:", err);
+        }
     }
 };
