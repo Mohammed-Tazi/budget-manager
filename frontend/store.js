@@ -49,6 +49,10 @@ export const store = {
         await fetch(`/api/transactions/${id}`, { method: "DELETE" });
     },
 
+    async deleteBudget(id) {
+        await fetch(`/api/budgets/${id}`, { method: "DELETE" });
+    },
+
     async deleteGoal(id) {
         const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Échec de la suppression de l'objectif");
