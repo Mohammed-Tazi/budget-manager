@@ -1,6 +1,6 @@
 import { store } from "./store.js";
 
-// --- SUPPRESSION ---
+// --- SUPPRESSION TRANSACTION ---
 window.deleteTx = async function(id) {
     if (!confirm("Voulez-vous vraiment supprimer cette transaction ?")) return;
     try {
@@ -18,7 +18,7 @@ window.handleAdd = async function() {
     const categoryEl = document.getElementById('category');
     const typeEl = document.getElementById('type');
 
-    if (!textEl || !amountEl || !textEl.value || !amountEl.value) {
+    if (!textEl?.value || !amountEl?.value) {
         return alert("Veuillez remplir le libellé et le montant.");
     }
 
@@ -26,47 +26,38 @@ window.handleAdd = async function() {
         text: textEl.value,
         amount: Number(amountEl.value),
         category: categoryEl ? categoryEl.value : "Général",
-        // On donne la priorité au menu déroulant s'il existe
-        type: typeEl ? typeEl.value : (categoryEl?.value === 'Salaire' ? 'income' : 'expense')
+        type: typeEl ? typeEl.value : "expense"
     };
 
     try {
         await store.saveTransaction(data);
         textEl.value = "";
         amountEl.value = "";
-        if (categoryEl) categoryEl.value = "";
         await init();
     } catch (err) {
         console.error("Erreur ajout:", err);
     }
 };
 
-// --- ENREGISTRER UN BUDGET (Version sécurisée par ID) ---
+// --- ENREGISTRER UN BUDGET ---
 window.handleSaveBudget = async function() {
-    // Il est préférable de mettre des ID (id="budgetCat" et id="budgetLimit") dans ton HTML
-    const categoryEl = document.getElementById('budgetCat');
-    const limitEl = document.getElementById('budgetLimit');
+    // On utilise les IDs 'cat' et 'val' de votre HTML
+    const categoryEl = document.getElementById('cat');
+    const limitEl = document.getElementById('val');
 
-    // Fallback si tu n'as pas encore mis les IDs
-    const catVal = categoryEl ? categoryEl.value : document.querySelectorAll('.card input')[0]?.value;
-    const limitVal = limitEl ? limitEl.value : document.querySelectorAll('.card input')[1]?.value;
-
-    if (!catVal || !limitVal) {
+    if (!categoryEl?.value || !limitEl?.value) {
         return alert("Veuillez remplir la catégorie et la limite financière.");
     }
 
     try {
         await store.saveBudget({
-            category: catVal,
-            limit: Number(limitVal)
+            category: categoryEl.value,
+            limit: Number(limitEl.value)
         }); 
         alert("Budget enregistré !");
-        
-        // Nettoyage
-        if(categoryEl) categoryEl.value = "";
-        if(limitEl) limitEl.value = "";
-        
-        await init(); 
+        categoryEl.value = "";
+        limitEl.value = "";
+        await init(); // Recharge tout pour afficher la nouvelle carte
     } catch (err) {
         console.error("Erreur budget:", err);
     }
@@ -87,8 +78,7 @@ function updateChart(income, expense) {
             datasets: [{
                 data: [income, expense],
                 backgroundColor: ['#1cc88a', '#e74a3b'],
-                borderWidth: 0,
-                hoverOffset: 10
+                borderWidth: 0
             }]
         },
         options: {
@@ -100,20 +90,27 @@ function updateChart(income, expense) {
     });
 }
 
-// --- SYNCHRONISATION ---
+// --- INITIALISATION GLOBALE ---
 async function init() {
     try {
+        // 1. Charger toutes les données
         await store.fetchTransactions();
+        await store.fetchBudgets();
+        
         const tx = store.transactions;
+        const budgets = store.budgets;
 
+        // 2. Calculs des KPI
         const income = tx.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
         const expense = tx.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
         const total = income - expense;
 
+        // Mise à jour affichage KPI
         if(document.getElementById("kpiTotal")) document.getElementById("kpiTotal").innerText = `${total} MAD`;
         if(document.getElementById("kpiIncome")) document.getElementById("kpiIncome").innerText = `${income} MAD`;
         if(document.getElementById("kpiExpense")) document.getElementById("kpiExpense").innerText = `${expense} MAD`;
 
+        // Score Santé
         const scoreEl = document.getElementById("financeScore");
         if (scoreEl) {
             const score = income > 0 ? Math.max(0, Math.min(100, Math.round((total / income) * 100))) : 0;
@@ -123,6 +120,32 @@ async function init() {
 
         updateChart(income, expense);
 
+        // 3. Affichage des Budgets (Page Budgets)
+        const budgetListEl = document.getElementById("budgetList");
+        if (budgetListEl) {
+            budgetListEl.innerHTML = budgets.length === 0 ? 
+                '<p style="opacity:0.5; grid-column: 1/-1;">Aucun budget défini.</p>' : 
+                budgets.map(b => {
+                    // Calcul de la barre de progression par catégorie
+                    const spent = tx.filter(t => t.category === b.category && t.type === "expense")
+                                    .reduce((s, t) => s + t.amount, 0);
+                    const progress = Math.min(100, (spent / b.limit) * 100);
+                    
+                    return `
+                        <div class="card">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <strong>${b.category}</strong>
+                                <span>${spent} / ${b.limit} MAD</span>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.1); height:8px; border-radius:10px; overflow:hidden;">
+                                <div style="background:${progress > 90 ? '#e74a3b' : '#3b82f6'}; width:${progress}%; height:100%;"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+        }
+
+        // 4. Affichage des Transactions
         const listEl = document.getElementById("txList") || document.getElementById("txLive");
         if (listEl) {
             listEl.innerHTML = tx.length === 0 ? '<p style="opacity:0.5; padding:10px;">Aucune transaction.</p>' : 
@@ -136,7 +159,7 @@ async function init() {
                         <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
                             ${t.type === 'income' ? '+' : '-'}${t.amount}
                         </b>
-                        <button onclick="window.deleteTx('${t._id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer; font-weight:bold; padding:5px;">✕</button>
+                        <button onclick="window.deleteTx('${t._id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer;">✕</button>
                     </div>
                 </div>
             `).join("");
