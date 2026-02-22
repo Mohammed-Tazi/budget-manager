@@ -3,7 +3,7 @@ export const store = {
     budgets: [],
     goals: [],
 
-    // --- RÉCUPÉRATION DES DONNÉES ---
+    // --- RÉCUPÉRATION ---
     async fetchTransactions() {
         const res = await fetch("/api/transactions");
         this.transactions = await res.json();
@@ -19,7 +19,7 @@ export const store = {
         this.goals = await res.json();
     },
 
-    // --- SAUVEGARDE DES DONNÉES ---
+    // --- SAUVEGARDE ---
     async saveTransaction(tx) {
         await fetch("/api/transactions", {
             method: "POST",
@@ -44,21 +44,22 @@ export const store = {
         });
     },
 
-    // --- SUPPRESSION (Correction : Routes spécifiques ajoutées) ---
-    
-    // Supprime une transaction
+    // --- SUPPRESSION INDIVIDUELLE ---
     async deleteTransaction(id) {
         await fetch(`/api/transactions/${id}`, { method: "DELETE" });
     },
 
-    // NOUVEAU : Supprime un budget
-    async deleteBudget(id) {
-        await fetch(`/api/budgets/${id}`, { method: "DELETE" });
-    },
-
-    // NOUVEAU : Supprime un objectif financier
     async deleteGoal(id) {
         const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Échec de la suppression de l'objectif");
+    },
+
+    // --- RÉINITIALISATION TOTALE ---
+    async resetAllData() {
+        const res = await fetch("/api/reset", { method: "DELETE" });
+        if (!res.ok) throw new Error("Erreur lors de la réinitialisation");
+        this.transactions = [];
+        this.budgets = [];
+        this.goals = [];
     }
 };
