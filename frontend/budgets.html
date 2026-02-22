@@ -3,106 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Pro - Excellence Financière</title>
+    <title>Budget Pro - Stratégie & Conseils</title>
     <link rel="stylesheet" href="app.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
-<body style="font-family: 'Inter', sans-serif;">
+<body>
 
 <div class="sidebar">
-    <div class="logo" style="padding: 20px; text-align: center;">
-        <h1 style="color: #3b82f6; font-size: 1.5rem;">💎 Budget Pro</h1>
+    <div class="logo">
+        <h1>💎 BUDGET PRO</h1>
     </div>
     <nav>
         <a href="dashboard.html">📊 Dashboard</a>
         <a href="transactions.html">💸 Transactions</a>
-        <a href="budgets.html" class="active">🛡️ Budgets</a>
+        <a href="budgets.html" class="active">🛡️ Stratégie Budget</a>
         <a href="analytics.html">📈 Analytics</a>
         <a href="goals.html">🎯 Goals</a>
     </nav>
-    <div class="sidebar-footer" style="position: absolute; bottom: 20px; padding: 20px; font-size: 0.8rem; opacity: 0.5;">
-        v2.4.0 Premium
-    </div>
+    <div class="sidebar-footer">v2.4.0 Premium</div>
 </div>
 
 <div class="main">
-    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <header class="main-header">
         <div>
-            <h2 style="font-size: 1.8rem; font-weight: 700;">Limites Budgétaires</h2>
-            <p style="opacity: 0.7;">Contrôlez vos flux financiers avec précision chirurgicale.</p>
+            <h2>Intelligence Budgétaire</h2>
+            <p>Analyse prédictive et optimisation de vos ressources.</p>
         </div>
-        <div class="user-profile" style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 50px;">
-            <div style="width: 35px; height: 35px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">JD</div>
-            <span>John Doe</span>
-        </div>
+        <div class="status-badge">✓ Score Santé : 88/100</div>
     </header>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-        <div class="card" style="border-bottom: 3px solid #1cc88a;">
-            <small style="opacity:0.6;">Efficacité Budgétaire</small>
-            <h3 style="margin: 5px 0;">92%</h3>
+    <div class="top-grid">
+        <div class="card main-analysis">
+            <h3>⚖️ Répartition Stratégique (Modèle 50/30/20)</h3>
+            <div class="split-bar">
+                <div class="bar needs" style="width: 50%;">BESOINS</div>
+                <div class="bar wants" style="width: 30%;">ENVIES</div>
+                <div class="bar savings" style="width: 20%;">ÉPARGNE</div>
+            </div>
+            <p class="analysis-text">
+                Basé sur un revenu moyen de <strong>25,000 MAD</strong>, votre allocation optimale suggère de ne pas dépasser 12,500 MAD pour vos charges fixes.
+            </p>
         </div>
-        <div class="card" style="border-bottom: 3px solid #f6c23e;">
-            <small style="opacity:0.6;">Alertes en cours</small>
-            <h3 style="margin: 5px 0;">2 Catégories</h3>
-        </div>
-        <div class="card" style="border-bottom: 3px solid #3b82f6;">
-            <small style="opacity:0.6;">Économie projetée</small>
-            <h3 style="margin: 5px 0;">4,500 MAD</h3>
+
+        <div class="card eco-potential">
+            <span class="emoji">📉</span>
+            <h4>Potentiel d'économie</h4>
+            <h2 class="blue-text">+1,200 MAD</h2>
+            <small>Optimisation des abonnements</small>
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 350px; gap: 30px;">
-        
-        <div>
-            <div class="card" style="background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(37,99,235,0.05) 100%); border: 1px solid rgba(59,130,246,0.2);">
-                <h3 style="margin-bottom: 15px;">🛡️ Configurer un nouveau plafond</h3>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <input id="budgetCategory" type="text" placeholder="Ex: Restaurant, Uber..." style="flex: 2; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 8px;">
-                    <input id="budgetLimit" type="number" placeholder="Limite (MAD)" style="flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 8px;">
-                    <button onclick="window.handleSaveBudget()" style="flex: 1; cursor: pointer; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; transition: 0.3s;">
-                        Activer
-                    </button>
-                </div>
-            </div>
-
-            <h3 style="margin: 30px 0 15px 5px; display: flex; align-items: center; gap: 10px;">
-                📅 Suivi du mois en cours <span style="font-size: 0.7rem; background: #1cc88a; padding: 2px 8px; border-radius: 10px;">Live</span>
-            </h3>
-            
-            <div class="grid" id="budgetList">
-                </div>
+    <h3 class="section-title">📚 Bibliothèque de Stratégies</h3>
+    <div class="advice-grid">
+        <div class="card advice-card blue-border">
+            <h4>☕ L'effet "Latte"</h4>
+            <p>En économisant 40 MAD/jour sur des petites dépenses, vous accumulez 14,600 MAD par an.</p>
         </div>
+        <div class="card advice-card yellow-border">
+            <h4>⏱️ Règle des 30 jours</h4>
+            <p>Attendez 30 jours pour tout achat > 500 MAD. 80% des achats impulsifs sont ainsi évités.</p>
+        </div>
+        <div class="card advice-card green-border">
+            <h4>🔄 Budget Inversé</h4>
+            <p>Payez-vous en premier : épargnez dès la réception du salaire, puis gérez le reste.</p>
+        </div>
+    </div>
 
-        <aside>
-            <div class="card" style="background: #1e293b; border: none;">
-                <h4 style="color: #f6c23e; margin-bottom: 15px;">💡 Conseils IA</h4>
-                <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.6;">
-                    <li style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
-                        ⚠️ Votre budget <strong>Loisirs</strong> a augmenté de 15% par rapport au mois dernier.
-                    </li>
-                    <li style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
-                        ✅ En maintenant ce rythme, vous pourrez épargner <strong>12,000 MAD</strong> d'ici décembre.
-                    </li>
-                    <li>
-                        ✨ Pensez à regrouper vos abonnements pour réduire les frais fixes de 200 MAD.
-                    </li>
-                </ul>
-            </div>
-
-            <div class="card" style="margin-top: 20px; background: rgba(28, 200, 138, 0.1); border: 1px dashed #1cc88a;">
-                <h4>🏆 Badge du mois</h4>
-                <div style="text-align: center; padding: 20px;">
-                    <span style="font-size: 3rem;">🥇</span>
-                    <p style="font-weight: bold; margin-top: 10px;">Gestionnaire Élite</p>
-                    <small style="opacity: 0.7;">Aucun dépassement depuis 22 jours.</small>
-                </div>
-            </div>
-        </aside>
+    <div class="card table-card">
+        <h3>📊 Repères du Marché (Maroc 2024)</h3>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Catégorie</th>
+                    <th>Recommandé (%)</th>
+                    <th>Statut</th>
+                    <th>Conseil IA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🏠 Logement</td>
+                    <td>30% - 35%</td>
+                    <td><span class="tag green">Optimal</span></td>
+                    <td>Rien à modifier.</td>
+                </tr>
+                <tr>
+                    <td>🍎 Alimentation</td>
+                    <td>15% - 20%</td>
+                    <td><span class="tag yellow">À surveiller</span></td>
+                    <td>Privilégiez le "Meal Prep".</td>
+                </tr>
+                <tr>
+                    <td>🚗 Transport</td>
+                    <td>10% - 15%</td>
+                    <td><span class="tag red">Élevé</span></td>
+                    <td>Envisagez le covoiturage.</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
-
-<script type="module" src="app.js"></script>
 
 </body>
 </html>

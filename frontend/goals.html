@@ -3,45 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Pro - Objectifs</title>
+    <title>Budget Pro - Objectifs de Vie</title>
     <link rel="stylesheet" href="app.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
 <div class="sidebar">
-    <h1>Budget Pro</h1>
+    <div class="logo">
+        <h1>💎 BUDGET PRO</h1>
+    </div>
     <nav>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="transactions.html">Transactions</a>
-        <a href="budgets.html">Budgets</a>
-        <a href="analytics.html">Analytics</a>
-        <a href="goals.html">Goals</a>
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="transactions.html">💸 Transactions</a>
+        <a href="budgets.html">🛡️ Stratégie Budget</a>
+        <a href="analytics.html">📈 Analytics</a>
+        <a href="goals.html" class="active">🎯 Goals Center</a>
     </nav>
+    <div class="sidebar-footer">v2.4.0 Premium</div>
 </div>
 
 <div class="main">
-    <header style="display: flex; justify-content: space-between; align-items: center;">
+    <header class="main-header">
         <div>
-            <h2>Mes Objectifs Financiers</h2>
-            <p style="opacity: 0.7;">Suivez votre progression en temps réel.</p>
+            <h2>Vision & Objectifs</h2>
+            <p>Transformez vos économies en projets concrets.</p>
         </div>
-        <button onclick="window.handleReset()" style="background: #e74a3b; padding: 8px 15px; font-size: 12px; border: none; border-radius: 5px; color: white; cursor: pointer;">
-            Réinitialiser l'historique
-        </button>
+        <div class="status-badge income">Projection : +45,000 MAD / an</div>
     </header>
 
-    <div class="card">
-        <h3>🎯 Nouvel objectif</h3>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-            <input id="goalName" type="text" placeholder="Ex: Voyage au Japon" style="flex: 2; min-width: 200px;">
-            <input id="goalTarget" type="number" placeholder="Montant cible (MAD)" style="flex: 1; min-width: 150px;">
-            <input id="goalSaved" type="number" placeholder="Déjà épargné (MAD)" style="flex: 1; min-width: 150px;">
-            <button onclick="window.handleSaveGoal()" style="flex: 1;">Enregistrer</button>
+    <div class="goals-summary-grid">
+        <div class="card summary-card">
+            <small>Total Objectifs</small>
+            <h3>150,000 MAD</h3>
+        </div>
+        <div class="card summary-card blue-bg">
+            <small>Épargné à ce jour</small>
+            <h3>42,500 MAD</h3>
+        </div>
+        <div class="card summary-card">
+            <small>Temps estimé (Moyen)</small>
+            <h3>14 Mois</h3>
         </div>
     </div>
 
-    <div class="grid" id="goalList" style="margin-top: 25px;"></div>
+    <h3 class="section-title">🚀 Vos Projets Prioritaires</h3>
+    <div class="goals-display-grid">
+        
+        <div class="card goal-card">
+            <div class="goal-header">
+                <span class="goal-icon">🏠</span>
+                <div class="goal-info">
+                    <h4>Apport Immobilier</h4>
+                    <p>Cible: 100,000 MAD</p>
+                </div>
+                <span class="goal-percent">35%</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar blue" style="width: 35%;"></div>
+            </div>
+            <p class="goal-footer">Prévu pour : <strong>Juin 2027</strong></p>
+        </div>
+
+        <div class="card goal-card">
+            <div class="goal-header">
+                <span class="goal-icon">✈️</span>
+                <div class="goal-info">
+                    <h4>Voyage Japon</h4>
+                    <p>Cible: 30,000 MAD</p>
+                </div>
+                <span class="goal-percent">60%</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar green" style="width: 60%;"></div>
+            </div>
+            <p class="goal-footer">Prévu pour : <strong>Décembre 2026</strong></p>
+        </div>
+
+        <div class="card goal-card">
+            <div class="goal-header">
+                <span class="goal-icon">💻</span>
+                <div class="goal-info">
+                    <h4>Setup Workstation</h4>
+                    <p>Cible: 20,000 MAD</p>
+                </div>
+                <span class="goal-percent">15%</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar yellow" style="width: 15%;"></div>
+            </div>
+            <p class="goal-footer">Prévu pour : <strong>Mars 2026</strong></p>
+        </div>
+
+    </div>
+
+    <div class="card strategy-card">
+        <h3>💡 Stratégies d'accélération</h3>
+        <div class="strategy-steps">
+            <div class="step">
+                <span class="step-number">01</span>
+                <div>
+                    <strong>Automatisez le virement</strong>
+                    <p>Programmez un virement de 2,000 MAD le 1er du mois vers votre compte épargne.</p>
+                </div>
+            </div>
+            <div class="step">
+                <span class="step-number">02</span>
+                <div>
+                    <strong>Règle du "Round-up"</strong>
+                    <p>Arrondissez chaque dépense à la dizaine supérieure et épargnez la différence.</p>
+                </div>
+            </div>
+            <div class="step">
+                <span class="step-number">03</span>
+                <div>
+                    <strong>Bonus & Primes</strong>
+                    <p>Allouez 70% de vos revenus exceptionnels directement à l'objectif "Immobilier".</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<script type="module" src="app.js"></script>
 </body>
 </html>
