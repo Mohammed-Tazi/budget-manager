@@ -3,7 +3,7 @@ export const store = {
     budgets: [],
     goals: [],
 
-    // --- RÉCUPÉRATION ---
+    // --- RÉCUPÉRATION DES DONNÉES ---
     async fetchTransactions() {
         const res = await fetch("/api/transactions");
         this.transactions = await res.json();
@@ -19,7 +19,7 @@ export const store = {
         this.goals = await res.json();
     },
 
-    // --- SAUVEGARDE ---
+    // --- SAUVEGARDE DES DONNÉES ---
     async saveTransaction(tx) {
         await fetch("/api/transactions", {
             method: "POST",
@@ -44,22 +44,37 @@ export const store = {
         });
     },
 
-    // --- SUPPRESSION INDIVIDUELLE ---
+    // --- SUPPRESSION (Correction : Routes spécifiques ajoutées) ---
+    
+    // Supprime une transaction
     async deleteTransaction(id) {
         await fetch(`/api/transactions/${id}`, { method: "DELETE" });
     },
 
+    // NOUVEAU : Supprime un budget
+    async deleteBudget(id) {
+        await fetch(`/api/budgets/${id}`, { method: "DELETE" });
+    },
+
+    // NOUVEAU : Supprime un objectif financier
     async deleteGoal(id) {
         const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Échec de la suppression de l'objectif");
-    },
-
-    // --- RÉINITIALISATION TOTALE ---
-    async resetAllData() {
+    }
+// --- DANS STORE.JS ---
+async resetAllData() {
+    try {
+        // Appelle une route globale de réinitialisation
         const res = await fetch("/api/reset", { method: "DELETE" });
-        if (!res.ok) throw new Error("Erreur lors de la réinitialisation");
+        if (!res.ok) throw new Error("Erreur serveur lors de la réinitialisation");
+        
+        // Vide les tableaux locaux pour mettre à jour l'interface immédiatement
         this.transactions = [];
         this.budgets = [];
         this.goals = [];
+    } catch (err) {
+        console.error("Échec du reset:", err);
+        throw err;
     }
+}
 };
