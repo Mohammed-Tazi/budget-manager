@@ -3,7 +3,7 @@ import { store } from "./store.js";
 // --- INITIALISATION PRINCIPALE ---
 async function init() {
     try {
-        // Chargement initial des données depuis le store
+        // Chargement initial des données
         await Promise.all([
             store.fetchTransactions(),
             store.fetchBudgets()
@@ -11,9 +11,10 @@ async function init() {
 
         const tx = store.transactions || [];
         
-        // Détection de la page actuelle via les IDs du HTML
+        // Détection de la page actuelle
         const isDashboard = document.getElementById('kpiTotal');
-        const isTransactionPage = document.getElementById('txListFull');
+        // Correction : On vérifie les deux IDs possibles pour la liste de transactions
+        const isTransactionPage = document.getElementById('txListFull') || document.getElementById('txList');
 
         if (isDashboard) {
             renderDashboard(tx);
@@ -28,13 +29,12 @@ async function init() {
     }
 }
 
-// --- LOGIQUE DU DASHBOARD (KPI + Graphiques + Activités) ---
+// --- LOGIQUE DU DASHBOARD ---
 function renderDashboard(tx) {
     const income = tx.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
     const expense = tx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
     const balance = income - expense;
 
-    // Mise à jour des compteurs
     const update = (id, val) => { 
         const el = document.getElementById(id);
         if(el) el.innerText = val; 
@@ -44,7 +44,6 @@ function renderDashboard(tx) {
     update("kpiIncome", `${income.toLocaleString()} MAD`);
     update("kpiExpense", `${expense.toLocaleString()} MAD`);
 
-    // Calcul du Score Santé
     const scoreEl = document.getElementById("financeScore");
     if (scoreEl) {
         const score = income > 0 ? Math.max(0, Math.min(100, Math.round((balance / income) * 100))) : 0;
@@ -52,17 +51,14 @@ function renderDashboard(tx) {
         scoreEl.style.color = score > 70 ? "#1cc88a" : score > 40 ? "#f6c23e" : "#e74a3b";
     }
 
-    // Graphique
     renderFlowChart(income, expense);
 
-    // Correction : Remplissage des "Dernières Activités" sur le Dashboard
     const liveEl = document.getElementById("txLive");
     if (liveEl) {
         const recent = tx.slice().reverse().slice(0, 5);
-        if (recent.length === 0) {
-            liveEl.innerHTML = "<p style='opacity:0.5; padding:20px;'>Aucune activité.</p>";
-        } else {
-            liveEl.innerHTML = recent.map(t => `
+        liveEl.innerHTML = recent.length === 0 ? 
+            "<p style='opacity:0.5; padding:20px;'>Aucune activité.</p>" :
+            recent.map(t => `
                 <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05);">
                     <span>${t.text || 'Sans titre'}</span>
                     <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
@@ -70,13 +66,13 @@ function renderDashboard(tx) {
                     </b>
                 </div>
             `).join("");
-        }
     }
 }
 
-// --- LOGIQUE PAGE TRANSACTIONS (Historique complet) ---
+// --- LOGIQUE PAGE TRANSACTIONS ---
 function renderTransactionPage(tx) {
-    const listEl = document.getElementById("txListFull");
+    // Support des deux IDs possibles vus dans vos captures
+    const listEl = document.getElementById("txListFull") || document.getElementById("txList");
     if (!listEl) return;
 
     if (tx.length === 0) {
@@ -84,7 +80,6 @@ function renderTransactionPage(tx) {
         return;
     }
 
-    // Affichage de l'historique complet
     listEl.innerHTML = tx.slice().reverse().map(t => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
             <div>
@@ -103,7 +98,8 @@ function renderTransactionPage(tx) {
 
 // --- ACTIONS GLOBALES ---
 
-window.handleAddTransaction = async function() {
+// CORRECTION CRITIQUE : Nom de fonction synchronisé avec le HTML
+window.handleAdd = async function() {
     const textEl = document.getElementById('text');
     const amountEl = document.getElementById('amount');
     const categoryEl = document.getElementById('category');
@@ -122,7 +118,6 @@ window.handleAddTransaction = async function() {
 
     try {
         await store.saveTransaction(data);
-        // Reset des champs
         textEl.value = "";
         amountEl.value = "";
         if(categoryEl) categoryEl.value = "";
