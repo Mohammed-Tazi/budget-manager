@@ -17,29 +17,29 @@
             <a href="goals.html">Goals</a>
         </nav>
     </div>
+
     <div class="main">
-        <div class="card">
-            <h3>Ajouter une opération</h3>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <input type="text" id="text" placeholder="Ex: Courses">
-                <input type="number" id="amount" placeholder="Montant">
-                <select id="category">
-                    <option value="Alimentation">Alimentation</option>
-                    <option value="Salaire">Salaire</option>
-                    <option value="Loisirs">Loisirs</option>
-                </select>
-                <button onclick="handleAdd()">Ajouter</button>
-            </div>
-        </div>
+        <header>
+            <h2>Tableau de Bord</h2>
+            <p style="opacity: 0.7;">Aperçu global de votre santé financière.</p>
+        </header>
+
         <div class="grid">
             <div class="card"><span>Solde Total</span><div class="big" id="kpiTotal">0 MAD</div></div>
             <div class="card"><span>Revenus</span><div class="big" id="kpiIncome" style="color:#1cc88a">0</div></div>
             <div class="card"><span>Dépenses</span><div class="big" id="kpiExpense" style="color:#e74a3b">0</div></div>
-            <div class="card"><span>Score Santé</span><div class="big" id="financeScore">0/100</div></div>
+            <div class="card"><span>Score Santé</span><div class="big" id="financeScore">--/100</div></div>
         </div>
-        <div class="card">
-            <h3>Flux Financier</h3>
-            <div style="height: 250px;"><canvas id="flowChart"></canvas></div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Flux Financier</h3>
+                <div style="height: 250px;"><canvas id="flowChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Dernières Activités</h3>
+                <div id="txLive"></div>
+            </div>
         </div>
     </div>
     <script type="module" src="app.js"></script>
