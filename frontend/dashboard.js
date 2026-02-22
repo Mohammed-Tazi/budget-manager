@@ -2,7 +2,6 @@ import { store } from "./store.js";
 
 async function initDashboard() {
     // 0. CHARGEMENT INDISPENSABLE
-    // On attend que les données arrivent du serveur avant de calculer quoi que ce soit
     await Promise.all([
         store.fetchTransactions(),
         store.fetchBudgets()
@@ -69,11 +68,10 @@ async function initDashboard() {
         }
     }
 
-    // 4. LOGIQUE DES ALERTES (Modification pour le format Array de MongoDB)
+    // 4. LOGIQUE DES ALERTES
     const alertsEl = document.getElementById("alerts");
     if (alertsEl) {
         const activeAlerts = [];
-        // On boucle sur le tableau de budgets venant de la base
         budgets.forEach(b => {
             const spent = tx.filter(t => t.category === b.category && t.type === "expense")
                            .reduce((s, t) => s + Number(t.amount), 0);
@@ -84,7 +82,7 @@ async function initDashboard() {
         alertsEl.innerHTML = activeAlerts.length > 0 ? activeAlerts.join("") : "✅ Tous les budgets sont respectés.";
     }
 
-    // 5. PRÉVISION FIN DE MOIS
+    // 5. PRÉVISION FIN DE MOIS (Fin du code manquant)
     const forecastEl = document.getElementById("forecast");
     if (forecastEl) {
         const now = new Date();
@@ -93,4 +91,13 @@ async function initDashboard() {
         
         if (expense > 0) {
             const dailyAverage = expense / currentDay;
-            const estimatedTotal = Math.round(dailyAverage * daysInMonth
+            const estimatedTotal = Math.round(dailyAverage * daysInMonth);
+            forecastEl.innerHTML = `Estimation fin de mois : <strong>${estimatedTotal} DH</strong>`;
+        } else {
+            forecastEl.innerHTML = "Pas assez de données pour estimer.";
+        }
+    }
+}
+
+// Lancement automatique
+initDashboard();
