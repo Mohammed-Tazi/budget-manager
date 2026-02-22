@@ -1,7 +1,7 @@
 <div class="card">
     <h3>➕ Ajouter une opération</h3>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-        <input id="text" type="text" placeholder="Libellé (ex: Salaire, Courses...)">
+        <input id="text" type="text" placeholder="Libellé (ex: Courses)">
         <input id="amount" type="number" placeholder="Montant (MAD)">
         <input id="category" type="text" placeholder="Catégorie">
         
@@ -10,13 +10,15 @@
             <option value="income">🟢 Revenu</option>
         </select>
 
-        <button id="addBtn">Ajouter</button>
+        <button onclick="window.handleAdd()" style="cursor:pointer; background:#6366f1; color:white; border:none; padding:10px 20px; border-radius:5px;">
+            Ajouter
+        </button>
     </div>
 </div>
 
 <div class="card">
     <h3>📜 Historique complet</h3>
-    <div id="txList">
-        <p style="opacity:0.5; padding:15px;">Chargement des données...</p>
-    </div>
+    <div id="txList">Chargement...</div>
 </div>
+
+<script type="module" src="app.js"></script>
