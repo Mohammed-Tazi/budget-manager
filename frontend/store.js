@@ -8,6 +8,11 @@ export const store = {
         this.transactions = await res.json();
     },
 
+    async fetchBudgets() {
+        const res = await fetch("/api/budgets");
+        this.budgets = await res.json();
+    },
+
     async fetchGoals() {
         const res = await fetch("/api/goals");
         this.goals = await res.json();
@@ -21,17 +26,27 @@ export const store = {
         });
     },
 
-    // Cette fonction est cruciale pour corriger ton erreur de suppression
     async deleteGoal(id) {
         const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
-        if (!res.ok) throw new Error("Erreur serveur lors de la suppression");
+        if (!res.ok) throw new Error("Erreur suppression");
     },
 
-    // Pour faire fonctionner ton bouton rouge de réinitialisation
     async resetAllData() {
-        const res = await fetch("/api/reset", { method: "DELETE" });
-        if (!res.ok) throw new Error("Échec du reset complet");
+        await fetch("/api/reset", { method: "DELETE" });
         this.transactions = [];
+        this.budgets = [];
         this.goals = [];
+    },
+
+    async saveTransaction(tx) {
+        await fetch("/api/transactions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tx)
+        });
+    },
+
+    async deleteTransaction(id) {
+        await fetch(`/api/transactions/${id}`, { method: "DELETE" });
     }
 };
