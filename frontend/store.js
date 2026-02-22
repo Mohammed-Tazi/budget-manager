@@ -3,7 +3,6 @@ export const store = {
     budgets: [],
     goals: [],
 
-    // --- RÉCUPÉRATION ---
     async fetchTransactions() {
         const res = await fetch("/api/transactions");
         this.transactions = await res.json();
@@ -19,23 +18,6 @@ export const store = {
         this.goals = await res.json();
     },
 
-    // --- SAUVEGARDE ---
-    async saveTransaction(tx) {
-        await fetch("/api/transactions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(tx)
-        });
-    },
-
-    async saveBudget(budget) {
-        await fetch("/api/budgets", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(budget)
-        });
-    },
-
     async saveGoal(goal) {
         await fetch("/api/goals", {
             method: "POST",
@@ -44,22 +26,27 @@ export const store = {
         });
     },
 
-    // --- SUPPRESSION INDIVIDUELLE ---
-    async deleteTransaction(id) {
-        await fetch(`/api/transactions/${id}`, { method: "DELETE" });
-    },
-
     async deleteGoal(id) {
         const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
-        if (!res.ok) throw new Error("Échec de la suppression de l'objectif");
+        if (!res.ok) throw new Error("Erreur suppression");
     },
 
-    // --- RÉINITIALISATION TOTALE ---
     async resetAllData() {
-        const res = await fetch("/api/reset", { method: "DELETE" });
-        if (!res.ok) throw new Error("Erreur lors de la réinitialisation");
+        await fetch("/api/reset", { method: "DELETE" });
         this.transactions = [];
         this.budgets = [];
         this.goals = [];
+    },
+
+    async saveTransaction(tx) {
+        await fetch("/api/transactions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tx)
+        });
+    },
+
+    async deleteTransaction(id) {
+        await fetch(`/api/transactions/${id}`, { method: "DELETE" });
     }
 };
