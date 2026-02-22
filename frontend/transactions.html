@@ -1,24 +1,60 @@
-<div class="card">
-    <h3>➕ Ajouter une opération</h3>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-        <input id="text" type="text" placeholder="Libellé (ex: Courses)">
-        <input id="amount" type="number" placeholder="Montant (MAD)">
-        <input id="category" type="text" placeholder="Catégorie">
-        
-        <select id="type">
-            <option value="expense">🔴 Dépense</option>
-            <option value="income">🟢 Revenu</option>
-        </select>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Pro - Transactions</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
 
-        <button onclick="window.handleAdd()" style="cursor:pointer; background:#6366f1; color:white; border:none; padding:10px 20px; border-radius:5px;">
-            Ajouter
-        </button>
+<div class="sidebar">
+    <h1>Budget Pro</h1>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="transactions.html" class="active">Transactions</a>
+    <a href="budgets.html">Budgets</a>
+    <a href="analytics.html">Analytics</a>
+    <a href="goals.html">Goals</a>
+</div>
+
+<div class="main">
+    <header>
+        <h2>Gestion des Transactions</h2>
+        <p style="opacity: 0.7;">Enregistrez vos revenus et vos dépenses quotidiennes.</p>
+    </header>
+
+    <div class="card">
+        <h3>➕ Ajouter une opération</h3>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start;">
+            <div style="flex: 2; min-width: 200px;">
+                <input id="text" type="text" placeholder="Libellé (ex: Salaire, Courses...)">
+            </div>
+            <div style="flex: 1; min-width: 120px;">
+                <input id="amount" type="number" placeholder="Montant (MAD)">
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <input id="category" type="text" placeholder="Catégorie">
+            </div>
+            <div style="flex: 1; min-width: 120px;">
+                <select id="type">
+                    <option value="expense">🔴 Dépense</option>
+                    <option value="income">🟢 Revenu</option>
+                </select>
+            </div>
+            <div style="flex: 0.5;">
+                <button onclick="window.handleAdd()">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 25px;">
+        <h3>📜 Historique complet</h3>
+        <div id="txList">
+            <p style="opacity:0.5; padding:20px;">Chargement des transactions...</p>
+        </div>
     </div>
 </div>
 
-<div class="card">
-    <h3>📜 Historique complet</h3>
-    <div id="txList">Chargement...</div>
-</div>
-
 <script type="module" src="app.js"></script>
+</body>
+</html>

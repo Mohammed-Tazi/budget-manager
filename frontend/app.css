@@ -193,3 +193,7 @@ button:hover {
     .sidebar h1, .sidebar a span { display: none; }
     .main { margin-left: 80px; width: calc(100% - 80px); }
 }
+/* Ajustement pour l'alignement horizontal du formulaire d'ajout */
+.card div input, .card div select {
+    margin-bottom: 0; /* Annule la marge du bas quand on est dans la ligne d'ajout */
+}
