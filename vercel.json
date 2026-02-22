@@ -6,7 +6,14 @@
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/backend/server.js" },
-    { "source": "/", "destination": "/frontend/dashboard.html" },
-    { "source": "/(.*)", "destination": "/frontend/$1" }
+    { "source": "/app.css", "destination": "/frontend/app.css" },
+    { "source": "/dashboard.js", "destination": "/frontend/dashboard.js" },
+    { "source": "/store.js", "destination": "/frontend/store.js" },
+    { "source": "/dashboard", "destination": "/frontend/dashboard.html" },
+    { "source": "/transactions", "destination": "/frontend/transactions.html" },
+    { "source": "/budgets", "destination": "/frontend/budgets.html" },
+    { "source": "/analytics", "destination": "/frontend/analytics.html" },
+    { "source": "/goals", "destination": "/frontend/goals.html" },
+    { "source": "/", "destination": "/frontend/dashboard.html" }
   ]
 }
