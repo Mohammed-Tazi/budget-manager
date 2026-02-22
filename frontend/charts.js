@@ -1,13 +1,12 @@
 import { store } from "./store.js";
 
-// Configuration des couleurs pour un rendu professionnel
 const COLORS = {
     income: "#1cc88a",
     expense: "#e74a3b",
-    chartBlue: "#3b82f6",
     text: "#9ca3af",
     grid: "rgba(255,255,255,0.05)",
-    palette: ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#6366f1"]
+    // Palette étendue pour éviter les couleurs répétées si beaucoup de catégories
+    palette: ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#6366f1", "#00d2d3", "#ff9f43"]
 };
 
 async function renderCharts() {
@@ -17,26 +16,28 @@ async function renderCharts() {
     if (!pieCtx || !barCtx) return;
 
     try {
+        // Correction : On s'assure que les données sont fraîches
         await store.fetchTransactions();
         const transactions = store.transactions || [];
 
-        // Gestion de l'état vide : On efface les graphiques si aucune donnée
         if (transactions.length === 0) {
+            // Nettoyage propre des instances Chart.js
             [pieCtx, barCtx].forEach(ctx => {
                 const chart = Chart.getChart(ctx);
                 if (chart) chart.destroy();
             });
-            // Optionnel : Afficher un message "Aucune donnée" dans le DOM ici
             return;
         }
 
-        // 1. PRÉPARATION DES DONNÉES (Un seul passage dans la liste pour la performance)
+        // 1. PRÉPARATION DES DONNÉES
         let totalIncome = 0;
         let totalExpense = 0;
         const categoryData = {};
 
         transactions.forEach(t => {
-            const amount = Number(t.amount) || 0;
+            // Conversion forcée en Number pour éviter les erreurs de type
+            const amount = Math.abs(Number(t.amount)) || 0; 
+            
             if (t.type === "income") {
                 totalIncome += amount;
             } else {
@@ -46,10 +47,8 @@ async function renderCharts() {
             }
         });
 
-        // 2. RENDU DU GRAPHIQUE CIRCULAIRE (Doughnut)
+        // 2. RENDU DES GRAPHIQUES
         renderPieChart(pieCtx, totalIncome, totalExpense);
-
-        // 3. RENDU DU GRAPHIQUE EN BARRES (Catégories)
         renderBarChart(barCtx, categoryData);
 
     } catch (error) {
@@ -61,6 +60,9 @@ function renderPieChart(ctx, income, expense) {
     const existing = Chart.getChart(ctx);
     if (existing) existing.destroy();
 
+    // Empêcher un graphique vide si income et expense sont à 0
+    if (income === 0 && expense === 0) return;
+
     new Chart(ctx, {
         type: "doughnut",
         data: {
@@ -68,28 +70,25 @@ function renderPieChart(ctx, income, expense) {
             datasets: [{
                 data: [income, expense],
                 backgroundColor: [COLORS.income, COLORS.expense],
-                borderWidth: 2,
-                borderColor: "#1a1a1a", // Séparateur discret entre les parts
-                hoverOffset: 20,
-                weight: 0.5
+                borderWidth: 0, // Suppression des bordures pour un look plus "flat"
+                hoverOffset: 15
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: "75%", // Plus fin, plus moderne
+            cutout: "80%", 
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { color: COLORS.text, font: { family: 'Inter, sans-serif', size: 12 }, padding: 20 }
+                    labels: { color: COLORS.text, font: { size: 12 }, padding: 20 }
                 },
                 tooltip: {
                     callbacks: {
                         label: (context) => ` ${context.label}: ${context.raw.toLocaleString()} MAD`
                     }
                 }
-            },
-            animation: { animateScale: true, animateRotate: true }
+            }
         }
     });
 }
@@ -106,11 +105,11 @@ function renderBarChart(ctx, categoryData) {
         data: {
             labels: labels,
             datasets: [{
-                label: "Dépenses par catégorie",
+                label: "Dépenses",
                 data: data,
-                backgroundColor: COLORS.palette, // Palette multicolore automatique
-                borderRadius: 6,
-                maxBarThickness: 40
+                backgroundColor: COLORS.palette,
+                borderRadius: 8, // Bords plus arrondis
+                maxBarThickness: 35
             }]
         },
         options: {
@@ -119,22 +118,19 @@ function renderBarChart(ctx, categoryData) {
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { color: COLORS.text, callback: value => value + " MAD" },
-                    grid: { color: COLORS.grid }
+                    grid: { color: COLORS.grid, drawBorder: false },
+                    ticks: { color: COLORS.text, font: { size: 10 } }
                 },
                 x: {
-                    ticks: { color: COLORS.text },
-                    grid: { display: false }
+                    grid: { display: false },
+                    ticks: { color: COLORS.text, font: { size: 10 } }
                 }
             },
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: '#1f2937',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    padding: 12,
-                    displayColors: false
+                    padding: 12
                 }
             }
         }
@@ -143,4 +139,5 @@ function renderBarChart(ctx, categoryData) {
 
 // Initialisation
 document.addEventListener("DOMContentLoaded", renderCharts);
+// Exposer la fonction pour pouvoir la rappeler après un ajout/suppression
 window.refreshCharts = renderCharts;

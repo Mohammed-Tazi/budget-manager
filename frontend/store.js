@@ -19,62 +19,72 @@ export const store = {
         this.goals = await res.json();
     },
 
-    // --- SAUVEGARDE DES DONNÉES ---
+    // --- SAUVEGARDE DES DONNÉES (Mise à jour locale ajoutée) ---
     async saveTransaction(tx) {
-        await fetch("/api/transactions", {
+        const res = await fetch("/api/transactions", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(tx)
         });
+        if (res.ok) await this.fetchTransactions(); // Rafraîchir la liste locale
     },
 
     async saveBudget(budget) {
-        await fetch("/api/budgets", {
+        const res = await fetch("/api/budgets", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(budget)
         });
+        if (res.ok) await this.fetchBudgets();
     },
 
     async saveGoal(goal) {
-        await fetch("/api/goals", {
+        const res = await fetch("/api/goals", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(goal)
         });
+        if (res.ok) await this.fetchGoals();
     },
 
-    // --- SUPPRESSION (Correction : Routes spécifiques ajoutées) ---
+    // --- SUPPRESSION (Correction IDs & Filtrage local) ---
     
-    // Supprime une transaction
     async deleteTransaction(id) {
-        await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+        if (res.ok) {
+            // Filtrer localement pour une réactivité immédiate
+            this.transactions = this.transactions.filter(t => (t._id || t.id) !== id);
+        }
     },
 
-    // NOUVEAU : Supprime un budget
     async deleteBudget(id) {
-        await fetch(`/api/budgets/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/budgets/${id}`, { method: "DELETE" });
+        if (res.ok) {
+            this.budgets = this.budgets.filter(b => (b._id || b.id) !== id);
+        }
     },
 
-    // NOUVEAU : Supprime un objectif financier
     async deleteGoal(id) {
         const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Échec de la suppression de l'objectif");
-    }
-// --- DANS STORE.JS ---
-async resetAllData() {
-    try {
-        // Appelle une route globale de réinitialisation
-        const res = await fetch("/api/reset", { method: "DELETE" });
-        if (!res.ok) throw new Error("Erreur serveur lors de la réinitialisation");
         
-        // Vide les tableaux locaux pour mettre à jour l'interface immédiatement
-        this.transactions = [];
-        this.budgets = [];
-        this.goals = [];
-    } catch (err) {
-        console.error("Échec du reset:", err);
-        throw err;
+        // Mise à jour locale après succès
+        this.goals = this.goals.filter(g => (g._id || g.id) !== id);
+    },
+
+    // --- RÉINITIALISATION (Correction Reset) ---
+    async resetAllData() {
+        try {
+            const res = await fetch("/api/reset", { method: "DELETE" });
+            if (!res.ok) throw new Error("Erreur serveur lors de la réinitialisation");
+            
+            // On vide tout localement
+            this.transactions = [];
+            this.budgets = [];
+            this.goals = [];
+        } catch (err) {
+            console.error("Échec du reset:", err);
+            throw err;
+        }
     }
-}
 };
