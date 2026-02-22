@@ -12,11 +12,11 @@
 <div class="sidebar">
     <h1>Budget Pro</h1>
     <nav>
-        <a href="/" class="active">Dashboard</a>
-        <a href="/transactions">Transactions</a>
-        <a href="/budgets">Budgets</a>
-        <a href="/analytics">Analytics</a>
-        <a href="/goals">Goals</a>
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="transactions.html">Transactions</a>
+        <a href="budgets.html">Budgets</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="goals.html">Goals</a>
     </nav>
 </div>
 
@@ -25,6 +25,21 @@
         <h2>Centre financier intelligent</h2>
         <p id="currentDate" style="opacity: 0.7;"></p>
     </header>
+
+    <div class="card" style="margin-bottom: 20px;">
+        <h3>Ajouter une opération</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
+            <input type="text" id="text" placeholder="Ex: Courses" style="padding: 10px; border-radius: 5px; border: 1px solid #444; background: #222; color: white;">
+            <input type="number" id="amount" placeholder="Montant (MAD)" style="padding: 10px; border-radius: 5px; border: 1px solid #444; background: #222; color: white;">
+            <select id="category" style="padding: 10px; border-radius: 5px; border: 1px solid #444; background: #222; color: white;">
+                <option value="Alimentation">Alimentation</option>
+                <option value="Loisirs">Loisirs</option>
+                <option value="Salaire">Salaire</option>
+                <option value="Transport">Transport</option>
+            </select>
+            <button onclick="handleAdd()" style="background: var(--accent, #6366f1); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Ajouter</button>
+        </div>
+    </div>
 
     <div class="grid">
         <div class="card">
@@ -45,37 +60,10 @@
         </div>
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <h3>Flux Mensuel</h3>
-            <div class="chart-container" style="position: relative; height:250px;">
-                <canvas id="flowChart"></canvas>
-            </div>
-        </div>
-        <div class="card">
-            <h3>Répartition Dépenses</h3>
-            <div class="chart-container" style="position: relative; height:250px;">
-                <canvas id="categoryChart"></canvas>
-            </div>
-        </div>
-    </div>
-
     <div class="card">
         <h3>Transactions en direct</h3>
         <div id="txLive" class="list-container">
             <p style="opacity:0.5; padding:15px;">Chargement des données...</p>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h3>Alertes & Notifications</h3>
-            <div id="alerts" class="alert-box">✅ Analyse des budgets en cours...</div>
-        </div>
-        <div class="card">
-            <h3>Intelligence Artificielle</h3>
-            <p><strong>Prévision fin du mois :</strong></p>
-            <div id="forecast" class="forecast-box" style="font-size: 1.5rem; font-weight: bold; margin-top: 10px; color: var(--accent);">Calcul en cours...</div>
         </div>
     </div>
 </div>
@@ -84,9 +72,20 @@
     document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', { 
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
+
+    // Fonction de pont entre le bouton HTML et ton script module
+    function handleAdd() {
+        const data = {
+            text: document.getElementById('text').value,
+            amount: document.getElementById('amount').value,
+            category: document.getElementById('category').value,
+            type: document.getElementById('category').value === 'Salaire' ? 'income' : 'expense'
+        };
+        window.addTransaction(data);
+    }
 </script>
 
-<script type="module" src="dashboard.js"></script>
+<script type="module" src="app.js"></script>
 
 </body>
 </html>
