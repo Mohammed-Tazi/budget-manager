@@ -4,19 +4,18 @@ const cors = require('cors');
 
 const app = express();
 
-// Autoriser le partage de données entre le frontend et le backend
+// Configuration des middlewares
 app.use(express.json());
 app.use(cors());
 
-// --- CONFIGURATION MONGODB ATLAS ---
-// REMPLACE 'TON_MOT_DE_PASSE' par le mot de passe de l'utilisateur Mohammedtazix
-const MONGO_URI = "mongodb+srv://Mohammedtazix:TON_MOT_DE_PASSE@cluster0.zqd3ws4.mongodb.net/budgetDB?retryWrites=true&w=majority&appName=Cluster0";
+// --- TA CONNEXION MONGODB ATLAS ---
+const MONGO_URI = "mongodb+srv://Mohammedtazix:8Db9016f@cluster0.zqd3ws4.mongodb.net/budgetDB?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log("✅ Connecté à ton Cloud MongoDB Atlas !"))
-    .catch(err => console.error("❌ Erreur de connexion au Cloud :", err));
+    .then(() => console.log("✅ RÉUSSI : Ton site est connecté au Cloud MongoDB Atlas !"))
+    .catch(err => console.error("❌ ERREUR de connexion :", err));
 
-// --- STRUCTURE DES DONNÉES (Schema) ---
+// --- MODÈLE DE DONNÉES ---
 const TransactionSchema = new mongoose.Schema({
     text: String,
     amount: Number,
@@ -27,41 +26,41 @@ const TransactionSchema = new mongoose.Schema({
 
 const Transaction = mongoose.model('Transaction', TransactionSchema);
 
-// --- ROUTES POUR TON SITE (API) ---
+// --- ROUTES API ---
 
-// Récupérer la liste des transactions
+// 1. Récupérer les transactions
 app.get('/api/transactions', async (req, res) => {
     try {
         const transactions = await Transaction.find().sort({ date: -1 });
         res.json(transactions);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ message: err.message });
     }
 });
 
-// Ajouter une nouvelle transaction
+// 2. Ajouter une transaction
 app.post('/api/transactions', async (req, res) => {
     try {
         const newTx = new Transaction(req.body);
         await newTx.save();
         res.json(newTx);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(400).json({ message: err.message });
     }
 });
 
-// Supprimer une transaction
+// 3. Supprimer une transaction
 app.delete('/api/transactions/:id', async (req, res) => {
     try {
         await Transaction.findByIdAndDelete(req.params.id);
-        res.json({ message: "Supprimé !" });
+        res.json({ message: "Transaction supprimée" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ message: err.message });
     }
 });
 
-// Lancer le moteur sur le port 5000
+// Lancement du serveur
 const PORT = 5000;
 app.listen(PORT, () => {
-    console.log(`🚀 Serveur en ligne sur http://localhost:${PORT}`);
-});
+    console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
+});s
