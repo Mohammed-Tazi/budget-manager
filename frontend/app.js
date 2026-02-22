@@ -1,106 +1,77 @@
 import { store } from "./store.js";
 
-/* ==========================================
-   1. ACTIONS GLOBALES (Accessibles via HTML)
-========================================== */
+// Attacher les fonctions au window pour le HTML
+window.addTransaction = async (tx) => {
+    await store.saveTransaction(tx);
+    location.reload();
+};
 
-window.addTransaction = async (t) => {
-    if (!t.text || !t.amount) return alert("Veuillez remplir le libellé et le montant.");
-    
-    const newTx = {
-        text: t.text,
-        amount: Number(t.amount),
-        category: t.category || "Général",
-        type: t.type || "expense"
-    };
+window.addGoal = async (goal) => {
+    await store.saveGoal(goal);
+    location.reload();
+};
 
-    try {
-        await store.saveTransaction(newTx); 
-        clearInputs(["text", "amount", "category"]);
-        await refreshData(); 
-        alert("Transaction ajoutée !");
-    } catch (err) {
-        alert("Erreur : " + err.message);
+window.deleteTx = async (id) => {
+    if(confirm("Supprimer ?")) {
+        await store.deleteTransaction(id);
+        location.reload();
     }
 };
 
-window.deleteTransaction = async (id) => {
-    if(confirm("Supprimer cette transaction ?")) {
-        try {
-            await store.deleteTransaction(id); 
-            await refreshData();
-        } catch (err) {
-            alert("Erreur lors de la suppression");
-        }
-    }
-};
+async function init() {
+    const path = window.location.pathname;
 
-/* ==========================================
-   2. RENDU ET MISE À JOUR
-========================================= */
+    // Charger les transactions partout
+    await store.fetchTransactions();
 
-async function refreshData() {
-    try {
-        await store.fetchTransactions();
-        render();
-    } catch (err) {
-        console.error("Échec du chargement", err);
+    // Rendu spécifique selon la page
+    if (path.includes("transactions.html")) {
+        renderTransactions();
+    } else if (path.includes("goals.html")) {
+        await store.fetchGoals();
+        renderGoals();
+    } else {
+        renderLiveFeed(); // Pour le Dashboard
     }
 }
 
-function render() {
-    const stats = calculateTotals();
-
-    const update = (id, val, isCurrency = false) => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = val.toLocaleString() + (isCurrency ? " MAD" : "");
-    };
-
-    update("kpiTotal", stats.total, true);
-    update("kpiIncome", stats.income);
-    update("kpiExpense", stats.expense);
-
-    renderTransactionsList();
-}
-
-function calculateTotals() {
-    let income = 0, expense = 0;
-    store.transactions.forEach(t => {
-        const val = Number(t.amount) || 0;
-        t.type === "income" ? income += val : expense += val;
-    });
-    return { income, expense, total: income - expense };
-}
-
-function renderTransactionsList() {
-    const el = document.getElementById("txList") || document.getElementById("txLive");
+function renderTransactions() {
+    const el = document.getElementById("txList");
     if (!el) return;
-    
-    if (store.transactions.length === 0) {
-        el.innerHTML = `<p style="opacity:0.5; padding:15px;">Aucune donnée.</p>`;
-        return;
-    }
-
-    el.innerHTML = store.transactions.map((t) => `
-        <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-            <div>
-                <strong>${t.text}</strong> <br><small style="opacity:0.7">${t.category}</small>
-            </div>
-            <div style="text-align: right; display:flex; align-items:center; gap:15px;">
-                <span style="font-weight:bold; color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
-                    ${t.type === 'income' ? '+' : '-'}${Number(t.amount).toLocaleString()} MAD
-                </span>
-                <button onclick="deleteTransaction('${t._id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer; font-size: 1.2rem;">✕</button>
-            </div>
+    el.innerHTML = store.transactions.map(t => `
+        <div class="card" style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <span>${t.text} (${t.category})</span>
+            <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">${t.amount} MAD 
+               <span onclick="deleteTx('${t._id}')" style="cursor:pointer; margin-left:10px;">🗑️</span>
+            </b>
         </div>
     `).join("");
 }
 
-function clearInputs(ids) {
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-    });
+function renderGoals() {
+    const el = document.getElementById("goalList");
+    if (!el) return;
+    el.innerHTML = store.goals.map(g => {
+        const percent = Math.min(Math.round((g.saved / g.target) * 100), 100);
+        return `
+            <div class="card">
+                <h4>${g.name}</h4>
+                <p>${g.saved} / ${g.target} MAD (${percent}%)</p>
+                <div style="background:#444; height:10px; border-radius:5px;">
+                    <div style="background:#6366f1; width:${percent}%; height:100%; border-radius:5px;"></div>
+                </div>
+            </div>
+        `;
+    }).join("");
 }
 
-document.addEventListener("DOMContentLoaded", refreshData);
+function renderLiveFeed() {
+    const el = document.getElementById("txLive");
+    if (el) {
+        el.innerHTML = store.transactions.slice(0, 5).map(t => `
+            <div style="padding:10px; border-bottom:1px solid #333;">${t.text} : ${t.amount} MAD</div>
+        `).join("");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", init);

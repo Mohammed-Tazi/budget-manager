@@ -6,67 +6,38 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connexion MongoDB via variable d'environnement Vercel
-const mongoURI = process.env.MONGO_URI;
-
-mongoose.connect(mongoURI)
-  .then(() => console.log("✅ MongoDB connecté avec succès"))
-  .catch(err => console.error("❌ Erreur de connexion MongoDB :", err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connecté"))
+  .catch(err => console.error("❌ Erreur MongoDB :", err));
 
 /* --- MODÈLES --- */
 const Transaction = mongoose.model('Transaction', new mongoose.Schema({
-    text: String,
-    amount: Number,
-    category: String,
-    type: String, // 'income' ou 'expense'
-    date: { type: Date, default: Date.now }
+    text: String, amount: Number, category: String, type: String, date: { type: Date, default: Date.now }
 }));
 
 const Budget = mongoose.model('Budget', new mongoose.Schema({
-    category: String,
-    limit: Number
+    category: String, limit: Number
 }));
 
-/* --- ROUTES API --- */
+const Goal = mongoose.model('Goal', new mongoose.Schema({
+    name: String, target: Number, saved: { type: Number, default: 0 }
+}));
 
+/* --- ROUTES --- */
 // Transactions
-app.get('/api/transactions', async (req, res) => {
-    try {
-        const tx = await Transaction.find().sort({ date: -1 });
-        res.json(tx);
-    } catch (err) { res.status(500).json(err); }
-});
-
-app.post('/api/transactions', async (req, res) => {
-    try {
-        const newTx = new Transaction(req.body);
-        await newTx.save();
-        res.json(newTx);
-    } catch (err) { res.status(500).json(err); }
-});
-
+app.get('/api/transactions', async (req, res) => res.json(await Transaction.find().sort({ date: -1 })));
+app.post('/api/transactions', async (req, res) => res.json(await new Transaction(req.body).save()));
 app.delete('/api/transactions/:id', async (req, res) => {
-    try {
-        await Transaction.findByIdAndDelete(req.params.id);
-        res.json({ message: "Supprimé" });
-    } catch (err) { res.status(500).json(err); }
+    await Transaction.findByIdAndDelete(req.params.id);
+    res.json({ message: "Supprimé" });
 });
 
 // Budgets
-app.get('/api/budgets', async (req, res) => {
-    try {
-        const budgets = await Budget.find();
-        res.json(budgets);
-    } catch (err) { res.status(500).json(err); }
-});
+app.get('/api/budgets', async (req, res) => res.json(await Budget.find()));
+app.post('/api/budgets', async (req, res) => res.json(await new Budget(req.body).save()));
 
-app.post('/api/budgets', async (req, res) => {
-    try {
-        const newBudget = new Budget(req.body);
-        await newBudget.save();
-        res.json(newBudget);
-    } catch (err) { res.status(500).json(err); }
-});
+// Objectifs (Goals)
+app.get('/api/goals', async (req, res) => res.json(await Goal.find()));
+app.post('/api/goals', async (req, res) => res.json(await new Goal(req.body).save()));
 
-// Export pour Vercel (PAS de app.listen)
 module.exports = app;

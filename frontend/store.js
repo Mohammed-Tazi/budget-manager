@@ -1,42 +1,39 @@
 export const store = {
     transactions: [],
     budgets: [],
+    goals: [],
 
-    // Récupérer toutes les transactions
     async fetchTransactions() {
-        try {
-            const res = await fetch("/api/transactions");
-            if (!res.ok) throw new Error("Échec fetch transactions");
-            this.transactions = await res.json();
-        } catch (err) {
-            console.error("Erreur Store (Transactions):", err);
-            this.transactions = [];
-        }
+        const res = await fetch("/api/transactions");
+        this.transactions = await res.json();
     },
 
-    // Récupérer les budgets
     async fetchBudgets() {
-        try {
-            const res = await fetch("/api/budgets");
-            if (!res.ok) throw new Error("Échec fetch budgets");
-            this.budgets = await res.json();
-        } catch (err) {
-            console.error("Erreur Store (Budgets):", err);
-            this.budgets = [];
-        }
+        const res = await fetch("/api/budgets");
+        this.budgets = await res.json();
     },
 
-    // Sauvegarder une transaction
+    async fetchGoals() {
+        const res = await fetch("/api/goals");
+        this.goals = await res.json();
+    },
+
     async saveTransaction(tx) {
-        const res = await fetch("/api/transactions", {
+        await fetch("/api/transactions", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(tx)
         });
-        return await res.json();
     },
 
-    // Supprimer une transaction
+    async saveGoal(goal) {
+        await fetch("/api/goals", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(goal)
+        });
+    },
+
     async deleteTransaction(id) {
         await fetch(`/api/transactions/${id}`, { method: "DELETE" });
     }
