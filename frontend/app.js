@@ -3,31 +3,81 @@ import { store } from "./store.js";
 // --- INITIALISATION PRINCIPALE ---
 async function init() {
     try {
-        // Chargement initial des données
         await Promise.all([
             store.fetchTransactions(),
             store.fetchBudgets()
         ]);
 
         const tx = store.transactions || [];
+        const budgets = store.budgets || [];
         
-        // Détection de la page actuelle
         const isDashboard = document.getElementById('kpiTotal');
-        // Correction : On vérifie les deux IDs possibles pour la liste de transactions
         const isTransactionPage = document.getElementById('txListFull') || document.getElementById('txList');
+        const isBudgetPage = document.getElementById('budgetList'); // ID pour la liste des budgets
 
-        if (isDashboard) {
-            renderDashboard(tx);
-        }
-
-        if (isTransactionPage) {
-            renderTransactionPage(tx);
-        }
+        if (isDashboard) renderDashboard(tx);
+        if (isTransactionPage) renderTransactionPage(tx);
+        if (isBudgetPage) renderBudgetPage(budgets, tx);
 
     } catch (err) {
         console.error("Erreur d'initialisation :", err);
     }
 }
+
+// --- GESTION DES BUDGETS (Correction) ---
+function renderBudgetPage(budgets, tx) {
+    const listEl = document.getElementById("budgetList");
+    if (!listEl) return;
+
+    if (budgets.length === 0) {
+        listEl.innerHTML = "<p style='opacity:0.5; padding:20px;'>Aucun budget défini.</p>";
+        return;
+    }
+
+    listEl.innerHTML = budgets.map(b => {
+        // Calcul du total dépensé pour cette catégorie
+        const spent = tx
+            .filter(t => t.category === b.category && t.type === 'expense')
+            .reduce((sum, t) => sum + Number(t.amount), 0);
+        
+        const percent = Math.min(100, Math.round((spent / b.limit) * 100));
+        const color = percent > 90 ? '#e74a3b' : percent > 70 ? '#f6c23e' : '#1cc88a';
+
+        return `
+            <div class="card" style="margin-bottom: 15px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <strong>${b.category}</strong>
+                    <span>${spent.toLocaleString()} / ${b.limit.toLocaleString()} MAD</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${percent}%; background: ${color}; height: 100%; transition: 0.3s;"></div>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+// Action pour le bouton "Enregistrer" de la page Budgets
+window.handleSaveBudget = async function() {
+    const catEl = document.getElementById('budgetCategory'); // Assurez-vous d'avoir cet ID dans le HTML
+    const limitEl = document.getElementById('budgetLimit');   // Assurez-vous d'avoir cet ID dans le HTML
+
+    if (!catEl?.value || !limitEl?.value) {
+        return alert("Veuillez remplir la catégorie et la limite.");
+    }
+
+    try {
+        await store.saveBudget({
+            category: catEl.value,
+            limit: Number(limitEl.value)
+        });
+        catEl.value = "";
+        limitEl.value = "";
+        await init();
+    } catch (err) {
+        alert("Erreur lors de l'enregistrement du budget.");
+    }
+};
 
 // --- LOGIQUE DU DASHBOARD ---
 function renderDashboard(tx) {
@@ -71,7 +121,6 @@ function renderDashboard(tx) {
 
 // --- LOGIQUE PAGE TRANSACTIONS ---
 function renderTransactionPage(tx) {
-    // Support des deux IDs possibles vus dans vos captures
     const listEl = document.getElementById("txListFull") || document.getElementById("txList");
     if (!listEl) return;
 
@@ -97,8 +146,6 @@ function renderTransactionPage(tx) {
 }
 
 // --- ACTIONS GLOBALES ---
-
-// CORRECTION CRITIQUE : Nom de fonction synchronisé avec le HTML
 window.handleAdd = async function() {
     const textEl = document.getElementById('text');
     const amountEl = document.getElementById('amount');
@@ -109,15 +156,13 @@ window.handleAdd = async function() {
         return alert("Veuillez remplir le libellé et le montant.");
     }
 
-    const data = {
-        text: textEl.value,
-        amount: Number(amountEl.value),
-        category: categoryEl?.value || "Général",
-        type: typeEl?.value || "expense"
-    };
-
     try {
-        await store.saveTransaction(data);
+        await store.saveTransaction({
+            text: textEl.value,
+            amount: Number(amountEl.value),
+            category: categoryEl?.value || "Général",
+            type: typeEl?.value || "expense"
+        });
         textEl.value = "";
         amountEl.value = "";
         if(categoryEl) categoryEl.value = "";
