@@ -5,7 +5,7 @@ window.deleteTx = async function(id) {
     if (!confirm("Voulez-vous vraiment supprimer cette transaction ?")) return;
     try {
         await store.deleteTransaction(id);
-        await init(); // Recharge les données pour mettre à jour le Dashboard et la liste
+        await init(); 
     } catch (err) {
         console.error("Erreur lors de la suppression:", err);
     }
@@ -33,17 +33,47 @@ window.handleAdd = async function() {
     await init();
 };
 
+// --- FONCTION GRAPHIQUE ---
+function updateChart(income, expense) {
+    const ctx = document.getElementById('flowChart');
+    if (!ctx) return; // Si on n'est pas sur le dashboard, on arrête
+
+    // On détruit l'ancien graphique s'il existe pour éviter les bugs visuels
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) existingChart.destroy();
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Revenus', 'Dépenses'],
+            datasets: [{
+                data: [income, expense],
+                backgroundColor: ['#1cc88a', '#e74a3b'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '80%', // Style anneau fin
+            plugins: {
+                legend: { display: false } // On cache la légende pour un look plus clean
+            }
+        }
+    });
+}
+
 // --- SYNCHRONISATION & AFFICHAGE ---
 async function init() {
     await store.fetchTransactions();
     const tx = store.transactions;
 
-    // Calculs pour les KPI (Dashboard)
     const income = tx.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const expense = tx.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
     const total = income - expense;
 
-    // Mise à jour des éléments du Dashboard s'ils existent
+    // Mise à jour des KPI
     if(document.getElementById("kpiTotal")) document.getElementById("kpiTotal").innerText = `${total} MAD`;
     if(document.getElementById("kpiIncome")) document.getElementById("kpiIncome").innerText = income;
     if(document.getElementById("kpiExpense")) document.getElementById("kpiExpense").innerText = expense;
@@ -55,7 +85,10 @@ async function init() {
         scoreEl.innerText = `${score}/100`;
     }
 
-    // Affichage de l'historique (Transactions ou Dashboard)
+    // MISE À JOUR DU GRAPHIQUE
+    updateChart(income, expense);
+
+    // Affichage de l'historique
     const listEl = document.getElementById("txList") || document.getElementById("txLive");
     if (listEl) {
         listEl.innerHTML = tx.map(t => `
@@ -68,7 +101,7 @@ async function init() {
                     <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
                         ${t.type === 'income' ? '+' : '-'}${t.amount} MAD
                     </b>
-                    <button onclick="window.deleteTx('${t._id}')" style="width:auto; padding:5px 8px; background:#e74a3b; font-size:10px; border-radius:5px;">X</button>
+                    <button onclick="window.deleteTx('${t._id}')" style="width:auto; padding:5px 8px; background:#e74a3b; font-size:10px; border-radius:5px; color:white; border:none; cursor:pointer;">X</button>
                 </div>
             </div>
         `).join("");
