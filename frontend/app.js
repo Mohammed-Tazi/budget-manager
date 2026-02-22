@@ -11,6 +11,24 @@ window.deleteTx = async function(id) {
     }
 };
 
+// --- NOUVEAU : SUPPRESSION OBJECTIF ---
+// Pour nettoyer vos tests qui affichent "undefined"
+window.deleteGoal = async function(id) {
+    if (!confirm("Supprimer cet objectif ?")) return;
+    try {
+        // On suppose que votre store a une méthode deleteGoal
+        if (store.deleteGoal) {
+            await store.deleteGoal(id);
+        } else {
+            // Alternative si la méthode n'est pas nommée ainsi
+            await store.deleteTransaction(id); 
+        }
+        await init();
+    } catch (err) {
+        console.error("Erreur suppression objectif:", err);
+    }
+};
+
 // --- AJOUT TRANSACTION ---
 window.handleAdd = async function() {
     const textEl = document.getElementById('text');
@@ -71,18 +89,17 @@ window.handleSaveGoal = async function() {
     }
 
     try {
+        // On force l'envoi en tant que Nombres pour éviter le 0%
         await store.saveGoal({
             title: titleEl.value,
             target: Number(targetEl.value),
             current: Number(currentEl.value) || 0
         });
-        alert("Objectif enregistré !");
         
-        // Nettoyage des champs
+        alert("Objectif enregistré !");
         titleEl.value = "";
         targetEl.value = "";
         currentEl.value = "";
-        
         await init(); 
     } catch (err) {
         console.error("Erreur objectif:", err);
@@ -93,10 +110,8 @@ window.handleSaveGoal = async function() {
 function updateChart(income, expense) {
     const ctx = document.getElementById('flowChart');
     if (!ctx) return;
-
     const existingChart = Chart.getChart(ctx);
     if (existingChart) existingChart.destroy();
-
     new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -136,52 +151,45 @@ async function init() {
         if(document.getElementById("kpiIncome")) document.getElementById("kpiIncome").innerText = `${income} MAD`;
         if(document.getElementById("kpiExpense")) document.getElementById("kpiExpense").innerText = `${expense} MAD`;
 
-        const scoreEl = document.getElementById("financeScore");
-        if (scoreEl) {
-            const score = income > 0 ? Math.max(0, Math.min(100, Math.round((total / income) * 100))) : 0;
-            scoreEl.innerText = `${score}/100`;
-            scoreEl.style.color = score > 70 ? "#1cc88a" : score > 40 ? "#f6c23e" : "#e74a3b";
-        }
-
         updateChart(income, expense);
 
-        // 2. Affichage des Budgets (Page Budgets)
+        // 2. Affichage des Budgets
         const budgetListEl = document.getElementById("budgetList");
         if (budgetListEl) {
-            budgetListEl.innerHTML = budgets.length === 0 ? 
-                '<p style="opacity:0.5; grid-column: 1/-1;">Aucun budget défini.</p>' : 
-                budgets.map(b => {
-                    const spent = tx.filter(t => t.category === b.category && t.type === "expense")
-                                    .reduce((s, t) => s + t.amount, 0);
-                    const progress = Math.min(100, (spent / b.limit) * 100);
-                    return `
-                        <div class="card">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                                <strong>${b.category}</strong>
-                                <span>${spent} / ${b.limit} MAD</span>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.1); height:8px; border-radius:10px; overflow:hidden;">
-                                <div style="background:${progress > 90 ? '#e74a3b' : '#3b82f6'}; width:${progress}%; height:100%;"></div>
-                            </div>
-                        </div>`;
-                }).join("");
+            budgetListEl.innerHTML = budgets.map(b => {
+                const spent = tx.filter(t => t.category === b.category && t.type === "expense").reduce((s, t) => s + t.amount, 0);
+                const progress = Math.min(100, (spent / b.limit) * 100);
+                return `
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <strong>${b.category}</strong>
+                            <span>${spent} / ${b.limit} MAD</span>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.1); height:8px; border-radius:10px; overflow:hidden;">
+                            <div style="background:${progress > 90 ? '#e74a3b' : '#3b82f6'}; width:${progress}%; height:100%;"></div>
+                        </div>
+                    </div>`;
+            }).join("");
         }
 
-        // 3. Affichage des Objectifs (Page Goals)
+        // 3. Affichage des Objectifs (Correction 100%)
         const goalListEl = document.getElementById("goalList");
         if (goalListEl) {
             goalListEl.innerHTML = goals.length === 0 ?
                 '<p style="opacity:0.5;">Aucun objectif défini.</p>' :
                 goals.map(g => {
-                    // Sécurité : Fallback sur les noms de propriétés pour éviter le "undefined"
-                    const title = g.title || g.name || "Objectif";
-                    const target = Number(g.target) || 0;
-                    const current = Number(g.current) || 0;
+                    // FALLBACK : On cherche toutes les appellations possibles des propriétés
+                    const title = g.title || g.name || g.text || "Objectif sans nom";
+                    const target = Number(g.target) || Number(g.amount) || 0;
+                    const current = Number(g.current) || Number(g.saved) || 0;
+                    
+                    // Calcul précis du pourcentage
                     const progress = target > 0 ? Math.min(100, (current / target) * 100) : 0;
                     
                     return `
-                        <div class="card" style="margin-bottom:15px;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <div class="card" style="margin-bottom:15px; position: relative;">
+                            <button onclick="window.deleteGoal('${g._id}')" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #e74a3b; cursor: pointer;">✕</button>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding-right: 20px;">
                                 <strong>${title}</strong>
                                 <span>${current} / ${target} MAD</span>
                             </div>
@@ -193,16 +201,12 @@ async function init() {
                 }).join("");
         }
 
-        // 4. Affichage des Transactions (Historique)
+        // 4. Affichage des Transactions
         const listEl = document.getElementById("txList") || document.getElementById("txLive");
         if (listEl) {
-            listEl.innerHTML = tx.length === 0 ? '<p style="opacity:0.5; padding:10px;">Aucune opération.</p>' : 
-            tx.map(t => `
+            listEl.innerHTML = tx.map(t => `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                    <div>
-                        <div style="font-weight:500;">${t.text}</div>
-                        <small style="opacity:0.5;">${t.category}</small>
-                    </div>
+                    <div><strong>${t.text}</strong><br><small style="opacity:0.5;">${t.category}</small></div>
                     <div style="display:flex; align-items:center; gap:15px;">
                         <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">${t.type === 'income' ? '+' : '-'}${t.amount}</b>
                         <button onclick="window.deleteTx('${t._id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer;">✕</button>

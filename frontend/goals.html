@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Pro - Objectifs d'Épargne</title>
+    <title>Budget Pro - Objectifs</title>
     <link rel="stylesheet" href="app.css">
 </head>
 <body>
-
 <div class="sidebar">
     <h1>Budget Pro</h1>
     <nav>
@@ -20,9 +19,12 @@
 </div>
 
 <div class="main">
-    <header>
-        <h2>Mes Objectifs Financiers</h2>
-        <p style="opacity: 0.7;">Planifiez vos projets et suivez votre progression.</p>
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2>Mes Objectifs Financiers</h2>
+            <p style="opacity: 0.7;">Suivez votre progression en temps réel.</p>
+        </div>
+        <button onclick="window.resetGoals()" style="background: #e74a3b; padding: 8px 15px; font-size: 12px;">Réinitialiser l'historique</button>
     </header>
 
     <div class="card">
@@ -31,17 +33,12 @@
             <input id="goalName" type="text" placeholder="Ex: Voyage au Japon" style="flex: 2; min-width: 200px;">
             <input id="goalTarget" type="number" placeholder="Montant cible (MAD)" style="flex: 1; min-width: 150px;">
             <input id="goalSaved" type="number" placeholder="Déjà épargné (MAD)" style="flex: 1; min-width: 150px;">
-            
-            <button onclick="window.handleSaveGoal()" style="flex: 1; cursor: pointer;">
-                Enregistrer
-            </button>
+            <button onclick="window.handleSaveGoal()" style="flex: 1;">Enregistrer</button>
         </div>
     </div>
 
     <div class="grid" id="goalList" style="margin-top: 25px;"></div>
 </div>
-
 <script type="module" src="app.js"></script>
-
 </body>
 </html>
