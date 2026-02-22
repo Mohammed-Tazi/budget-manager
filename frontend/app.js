@@ -3,6 +3,7 @@ import { store } from "./store.js";
 // --- INITIALISATION PRINCIPALE ---
 async function init() {
     try {
+        // Chargement des données depuis le store
         await Promise.all([
             store.fetchTransactions(),
             store.fetchBudgets()
@@ -11,10 +12,12 @@ async function init() {
         const tx = store.transactions || [];
         const budgets = store.budgets || [];
         
+        // Détection de la page actuelle
         const isDashboard = document.getElementById('kpiTotal');
-        const isTransactionPage = document.getElementById('txListFull') || document.getElementById('txList');
-        const isBudgetPage = document.getElementById('budgetList'); // ID pour la liste des budgets
+        const isTransactionPage = document.getElementById('txList');
+        const isBudgetPage = document.getElementById('budgetList');
 
+        // Exécution des rendus selon la page
         if (isDashboard) renderDashboard(tx);
         if (isTransactionPage) renderTransactionPage(tx);
         if (isBudgetPage) renderBudgetPage(budgets, tx);
@@ -24,7 +27,7 @@ async function init() {
     }
 }
 
-// --- GESTION DES BUDGETS (Correction) ---
+// --- GESTION DES BUDGETS ---
 function renderBudgetPage(budgets, tx) {
     const listEl = document.getElementById("budgetList");
     if (!listEl) return;
@@ -35,7 +38,6 @@ function renderBudgetPage(budgets, tx) {
     }
 
     listEl.innerHTML = budgets.map(b => {
-        // Calcul du total dépensé pour cette catégorie
         const spent = tx
             .filter(t => t.category === b.category && t.type === 'expense')
             .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -56,28 +58,6 @@ function renderBudgetPage(budgets, tx) {
         `;
     }).join("");
 }
-
-// Action pour le bouton "Enregistrer" de la page Budgets
-window.handleSaveBudget = async function() {
-    const catEl = document.getElementById('budgetCategory'); // Assurez-vous d'avoir cet ID dans le HTML
-    const limitEl = document.getElementById('budgetLimit');   // Assurez-vous d'avoir cet ID dans le HTML
-
-    if (!catEl?.value || !limitEl?.value) {
-        return alert("Veuillez remplir la catégorie et la limite.");
-    }
-
-    try {
-        await store.saveBudget({
-            category: catEl.value,
-            limit: Number(limitEl.value)
-        });
-        catEl.value = "";
-        limitEl.value = "";
-        await init();
-    } catch (err) {
-        alert("Erreur lors de l'enregistrement du budget.");
-    }
-};
 
 // --- LOGIQUE DU DASHBOARD ---
 function renderDashboard(tx) {
@@ -121,7 +101,7 @@ function renderDashboard(tx) {
 
 // --- LOGIQUE PAGE TRANSACTIONS ---
 function renderTransactionPage(tx) {
-    const listEl = document.getElementById("txListFull") || document.getElementById("txList");
+    const listEl = document.getElementById("txList");
     if (!listEl) return;
 
     if (tx.length === 0) {
@@ -145,7 +125,8 @@ function renderTransactionPage(tx) {
     `).join("");
 }
 
-// --- ACTIONS GLOBALES ---
+// --- ACTIONS GLOBALES (Attachées à window pour le HTML) ---
+
 window.handleAdd = async function() {
     const textEl = document.getElementById('text');
     const amountEl = document.getElementById('amount');
@@ -163,9 +144,12 @@ window.handleAdd = async function() {
             category: categoryEl?.value || "Général",
             type: typeEl?.value || "expense"
         });
+        
+        // Reset des champs
         textEl.value = "";
         amountEl.value = "";
         if(categoryEl) categoryEl.value = "";
+        
         await init(); 
     } catch (err) {
         alert("Erreur lors de l'ajout.");
@@ -182,24 +166,50 @@ window.handleDelete = async function(id) {
     }
 };
 
+window.handleSaveBudget = async function() {
+    const catEl = document.getElementById('budgetCategory'); 
+    const limitEl = document.getElementById('budgetLimit');  
+
+    if (!catEl?.value || !limitEl?.value) {
+        return alert("Veuillez remplir la catégorie et la limite.");
+    }
+
+    try {
+        await store.saveBudget({
+            category: catEl.value,
+            limit: Number(limitEl.value)
+        });
+        catEl.value = "";
+        limitEl.value = "";
+        await init();
+    } catch (err) {
+        alert("Erreur lors de l'enregistrement du budget.");
+    }
+};
+
+// --- GRAPHIQUE ---
 function renderFlowChart(income, expense) {
     const ctx = document.getElementById("flowChart");
     if (!ctx) return;
-    const existing = Chart.getChart(ctx);
-    if (existing) existing.destroy();
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Revenus', 'Dépenses'],
-            datasets: [{ data: [income, expense], backgroundColor: ['#1cc88a', '#e74a3b'], borderRadius: 5 }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } } }
-        }
-    });
+    
+    // Si Chart.js est disponible
+    if (typeof Chart !== 'undefined') {
+        const existing = Chart.getChart(ctx);
+        if (existing) existing.destroy();
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Revenus', 'Dépenses'],
+                datasets: [{ data: [income, expense], backgroundColor: ['#1cc88a', '#e74a3b'], borderRadius: 5 }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } } }
+            }
+        });
+    }
 }
 
 document.addEventListener("DOMContentLoaded", init);
