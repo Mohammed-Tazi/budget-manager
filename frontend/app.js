@@ -7,7 +7,7 @@ window.deleteTx = async function(id) {
         await store.deleteTransaction(id);
         await init(); 
     } catch (err) {
-        console.error("Erreur lors de la suppression:", err);
+        console.error("Erreur suppression:", err);
     }
 };
 
@@ -22,20 +22,18 @@ window.handleAdd = async function() {
         return alert("Veuillez remplir le libellé et le montant.");
     }
 
-    const data = {
-        text: textEl.value,
-        amount: Number(amountEl.value),
-        category: categoryEl ? categoryEl.value : "Général",
-        type: typeEl ? typeEl.value : "expense"
-    };
-
     try {
-        await store.saveTransaction(data);
+        await store.saveTransaction({
+            text: textEl.value,
+            amount: Number(amountEl.value),
+            category: categoryEl ? categoryEl.value : "Général",
+            type: typeEl ? typeEl.value : "expense"
+        });
         textEl.value = "";
         amountEl.value = "";
         await init();
     } catch (err) {
-        console.error("Erreur ajout:", err);
+        console.error("Erreur ajout tx:", err);
     }
 };
 
@@ -45,7 +43,7 @@ window.handleSaveBudget = async function() {
     const limitEl = document.getElementById('val');
 
     if (!categoryEl?.value || !limitEl?.value) {
-        return alert("Veuillez remplir la catégorie et la limite financière.");
+        return alert("Veuillez remplir la catégorie et la limite.");
     }
 
     try {
@@ -69,22 +67,19 @@ window.handleSaveGoal = async function() {
     const currentEl = document.getElementById('goalSaved');
 
     if (!titleEl?.value || !targetEl?.value) {
-        return alert("Veuillez remplir le nom du projet et le montant cible.");
+        return alert("Veuillez remplir le nom et le montant cible.");
     }
 
     try {
         await store.saveGoal({
-            title: titleEl.value,
+            title: titleEl.value, // On utilise "title" comme clé
             target: Number(targetEl.value),
             current: Number(currentEl.value) || 0
         });
         alert("Objectif enregistré !");
-        
-        // Nettoyage
         titleEl.value = "";
         targetEl.value = "";
         currentEl.value = "";
-        
         await init(); 
     } catch (err) {
         console.error("Erreur objectif:", err);
@@ -95,10 +90,8 @@ window.handleSaveGoal = async function() {
 function updateChart(income, expense) {
     const ctx = document.getElementById('flowChart');
     if (!ctx) return;
-
     const existingChart = Chart.getChart(ctx);
     if (existingChart) existingChart.destroy();
-
     new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -109,12 +102,7 @@ function updateChart(income, expense) {
                 borderWidth: 0
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '80%',
-            plugins: { legend: { display: false } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false } } }
     });
 }
 
@@ -129,7 +117,7 @@ async function init() {
         const budgets = store.budgets;
         const goals = store.goals;
 
-        // 1. Mise à jour des KPI (Dashboard)
+        // 1. KPI
         const income = tx.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
         const expense = tx.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
         const total = income - expense;
@@ -138,77 +126,57 @@ async function init() {
         if(document.getElementById("kpiIncome")) document.getElementById("kpiIncome").innerText = `${income} MAD`;
         if(document.getElementById("kpiExpense")) document.getElementById("kpiExpense").innerText = `${expense} MAD`;
 
-        const scoreEl = document.getElementById("financeScore");
-        if (scoreEl) {
-            const score = income > 0 ? Math.max(0, Math.min(100, Math.round((total / income) * 100))) : 0;
-            scoreEl.innerText = `${score}/100`;
-            scoreEl.style.color = score > 70 ? "#1cc88a" : score > 40 ? "#f6c23e" : "#e74a3b";
-        }
-
-        updateChart(income, expense);
-
-        // 2. Affichage des Budgets (Page Budgets)
+        // 2. Budgets
         const budgetListEl = document.getElementById("budgetList");
         if (budgetListEl) {
-            budgetListEl.innerHTML = budgets.length === 0 ? 
-                '<p style="opacity:0.5; grid-column: 1/-1;">Aucun budget défini.</p>' : 
-                budgets.map(b => {
-                    const spent = tx.filter(t => t.category === b.category && t.type === "expense")
-                                    .reduce((s, t) => s + t.amount, 0);
-                    const progress = Math.min(100, (spent / b.limit) * 100);
-                    return `
-                        <div class="card">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                                <strong>${b.category}</strong>
-                                <span>${spent} / ${b.limit} MAD</span>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.1); height:8px; border-radius:10px; overflow:hidden;">
-                                <div style="background:${progress > 90 ? '#e74a3b' : '#3b82f6'}; width:${progress}%; height:100%;"></div>
-                            </div>
-                        </div>`;
-                }).join("");
+            budgetListEl.innerHTML = budgets.map(b => {
+                const spent = tx.filter(t => t.category === b.category && t.type === "expense").reduce((s, t) => s + t.amount, 0);
+                const progress = Math.min(100, (spent / b.limit) * 100);
+                return `<div class="card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <strong>${b.category}</strong>
+                        <span>${spent} / ${b.limit} MAD</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.1); height:8px; border-radius:10px; overflow:hidden;">
+                        <div style="background:${progress > 90 ? '#e74a3b' : '#3b82f6'}; width:${progress}%; height:100%;"></div>
+                    </div>
+                </div>`;
+            }).join("");
         }
 
-        // 3. Affichage des Objectifs (Page Goals)
+        // 3. Objectifs (Correction "undefined" et "NaN")
         const goalListEl = document.getElementById("goalList");
         if (goalListEl) {
-            goalListEl.innerHTML = goals.length === 0 ?
-                '<p style="opacity:0.5;">Aucun objectif défini.</p>' :
-                goals.map(g => {
-                    const progress = Math.min(100, (g.current / g.target) * 100);
-                    return `
-                        <div class="card" style="margin-bottom:15px;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                                <strong>${g.title}</strong>
-                                <span>${g.current} / ${g.target} MAD</span>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.1); height:10px; border-radius:10px; overflow:hidden;">
-                                <div style="background:#1cc88a; width:${progress}%; height:100%;"></div>
-                            </div>
-                            <p style="font-size:11px; margin-top:5px; opacity:0.6;">${progress.toFixed(0)}% atteint</p>
-                        </div>`;
-                }).join("");
+            goalListEl.innerHTML = goals.map(g => {
+                const title = g.title || g.name || "Objectif";
+                const target = Number(g.target) || 0;
+                const current = Number(g.current) || 0;
+                const progress = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+
+                return `<div class="card" style="margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <strong>${title}</strong>
+                        <span>${current} / ${target} MAD</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.1); height:10px; border-radius:10px; overflow:hidden;">
+                        <div style="background:#1cc88a; width:${progress}%; height:100%;"></div>
+                    </div>
+                    <p style="font-size:11px; margin-top:5px; opacity:0.6;">${progress.toFixed(0)}% atteint</p>
+                </div>`;
+            }).join("");
         }
 
-        // 4. Affichage des Transactions (Historique)
+        // 4. Transactions
         const listEl = document.getElementById("txList") || document.getElementById("txLive");
         if (listEl) {
-            listEl.innerHTML = tx.length === 0 ? '<p style="opacity:0.5; padding:10px;">Aucune opération.</p>' : 
-            tx.map(t => `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                    <div>
-                        <div style="font-weight:500;">${t.text}</div>
-                        <small style="opacity:0.5;">${t.category}</small>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">${t.type === 'income' ? '+' : '-'}${t.amount}</b>
-                        <button onclick="window.deleteTx('${t._id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer;">✕</button>
-                    </div>
-                </div>`).join("");
+            listEl.innerHTML = tx.map(t => `<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                <div><strong>${t.text}</strong><br><small>${t.category}</small></div>
+                <div><b style="color:${t.type==='income'?'#1cc88a':'#e74a3b'}">${t.amount}</b>
+                <button onclick="window.deleteTx('${t._id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer; margin-left:10px;">✕</button></div>
+            </div>`).join("");
         }
-    } catch (err) {
-        console.error("Erreur initialisation:", err);
-    }
+        updateChart(income, expense);
+    } catch (err) { console.error("Init error:", err); }
 }
 
 document.addEventListener("DOMContentLoaded", init);
