@@ -1,5 +1,15 @@
 import { store } from "./store.js";
 
+// Configuration des couleurs pour un rendu professionnel
+const COLORS = {
+    income: "#1cc88a",
+    expense: "#e74a3b",
+    chartBlue: "#3b82f6",
+    text: "#9ca3af",
+    grid: "rgba(255,255,255,0.05)",
+    palette: ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#6366f1"]
+};
+
 async function renderCharts() {
     const pieCtx = document.getElementById("pie");
     const barCtx = document.getElementById("bar");
@@ -7,87 +17,130 @@ async function renderCharts() {
     if (!pieCtx || !barCtx) return;
 
     try {
-        // On récupère les données du serveur
         await store.fetchTransactions();
+        const transactions = store.transactions || [];
 
-        // Sécurité : Si pas de transactions, on affiche un message ou on vide les canvas
-        if (!store.transactions || store.transactions.length === 0) {
-            console.log("Aucune donnée pour les graphiques.");
+        // Gestion de l'état vide : On efface les graphiques si aucune donnée
+        if (transactions.length === 0) {
+            [pieCtx, barCtx].forEach(ctx => {
+                const chart = Chart.getChart(ctx);
+                if (chart) chart.destroy();
+            });
+            // Optionnel : Afficher un message "Aucune donnée" dans le DOM ici
             return;
         }
 
-        // 1. CALCULS DES DONNÉES
-        const income = store.transactions
-            .filter(t => t.type === "income")
-            .reduce((s, t) => s + Number(t.amount), 0);
-            
-        const expense = store.transactions
-            .filter(t => t.type === "expense")
-            .reduce((s, t) => s + Number(t.amount), 0);
+        // 1. PRÉPARATION DES DONNÉES (Un seul passage dans la liste pour la performance)
+        let totalIncome = 0;
+        let totalExpense = 0;
+        const categoryData = {};
 
-        // 2. GRAPHIQUE PIE
-        const existingPie = Chart.getChart(pieCtx);
-        if (existingPie) existingPie.destroy();
-
-        new Chart(pieCtx, {
-            type: "doughnut",
-            data: {
-                labels: ["Revenus", "Dépenses"],
-                datasets: [{ 
-                    data: [income, expense], 
-                    backgroundColor: ["#1cc88a", "#e74a3b"],
-                    borderWidth: 0, // Plus moderne sans bordure
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { color: '#9ca3af', padding: 20 } },
-                }
+        transactions.forEach(t => {
+            const amount = Number(t.amount) || 0;
+            if (t.type === "income") {
+                totalIncome += amount;
+            } else {
+                totalExpense += amount;
+                const cat = t.category || "Autre";
+                categoryData[cat] = (categoryData[cat] || 0) + amount;
             }
         });
 
-        // 3. GRAPHIQUE BAR (Dépenses par catégorie)
-        const cats = {};
-        store.transactions
-            .filter(t => t.type === "expense")
-            .forEach(t => {
-                const catName = t.category || "Autre";
-                cats[catName] = (cats[catName] || 0) + Number(t.amount);
-            });
+        // 2. RENDU DU GRAPHIQUE CIRCULAIRE (Doughnut)
+        renderPieChart(pieCtx, totalIncome, totalExpense);
 
-        const existingBar = Chart.getChart(barCtx);
-        if (existingBar) existingBar.destroy();
+        // 3. RENDU DU GRAPHIQUE EN BARRES (Catégories)
+        renderBarChart(barCtx, categoryData);
 
-        if (Object.keys(cats).length > 0) {
-            new Chart(barCtx, {
-                type: "bar",
-                data: {
-                    labels: Object.keys(cats),
-                    datasets: [{ 
-                        label: "MAD", 
-                        data: Object.values(cats), 
-                        backgroundColor: "#3b82f6",
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
     } catch (error) {
-        console.error("Erreur lors du rendu des graphiques:", error);
+        console.error("🚀 Erreur Analytics:", error);
     }
 }
 
+function renderPieChart(ctx, income, expense) {
+    const existing = Chart.getChart(ctx);
+    if (existing) existing.destroy();
+
+    new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["Revenus", "Dépenses"],
+            datasets: [{
+                data: [income, expense],
+                backgroundColor: [COLORS.income, COLORS.expense],
+                borderWidth: 2,
+                borderColor: "#1a1a1a", // Séparateur discret entre les parts
+                hoverOffset: 20,
+                weight: 0.5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "75%", // Plus fin, plus moderne
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: COLORS.text, font: { family: 'Inter, sans-serif', size: 12 }, padding: 20 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => ` ${context.label}: ${context.raw.toLocaleString()} MAD`
+                    }
+                }
+            },
+            animation: { animateScale: true, animateRotate: true }
+        }
+    });
+}
+
+function renderBarChart(ctx, categoryData) {
+    const existing = Chart.getChart(ctx);
+    if (existing) existing.destroy();
+
+    const labels = Object.keys(categoryData);
+    const data = Object.values(categoryData);
+
+    new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Dépenses par catégorie",
+                data: data,
+                backgroundColor: COLORS.palette, // Palette multicolore automatique
+                borderRadius: 6,
+                maxBarThickness: 40
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: COLORS.text, callback: value => value + " MAD" },
+                    grid: { color: COLORS.grid }
+                },
+                x: {
+                    ticks: { color: COLORS.text },
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1f2937',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    displayColors: false
+                }
+            }
+        }
+    });
+}
+
+// Initialisation
 document.addEventListener("DOMContentLoaded", renderCharts);
 window.refreshCharts = renderCharts;
