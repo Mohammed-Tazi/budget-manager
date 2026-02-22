@@ -11,12 +11,12 @@
 <div class="sidebar">
     <h1>Budget Pro</h1>
     <nav>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="transactions.html">Transactions</a>
-    <a href="budgets.html">Budgets</a>
-    <a href="analytics.html">Analytics</a>
-    <a href="goals.html">Goals</a>
-</nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="transactions.html">Transactions</a>
+        <a href="budgets.html" class="active">Budgets</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="goals.html">Goals</a>
+    </nav>
 </div>
 
 <div class="main">
@@ -28,19 +28,21 @@
     <div class="card">
         <h3>🛡️ Fixer un budget mensuel</h3>
         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-            <input id="cat" type="text" placeholder="Catégorie (ex: Nourriture, Loisirs...)" style="flex: 2; min-width: 200px;">
-            <input id="val" type="number" placeholder="Limite max (MAD)" style="flex: 1; min-width: 150px;">
+            <input id="budgetCategory" type="text" placeholder="Catégorie (ex: Nourriture, Loisirs...)" style="flex: 2; min-width: 200px;">
             
-          <button onclick="window.handleSaveBudget()" style="flex: 1; cursor: pointer;">
-    Enregistrer
-</button>
+            <input id="budgetLimit" type="number" placeholder="Limite max (MAD)" style="flex: 1; min-width: 150px;">
+            
+            <button onclick="window.handleSaveBudget()" style="flex: 1; cursor: pointer; background-color: #3b82f6; color: white; border: none; border-radius: 4px; padding: 10px;">
+                Enregistrer
+            </button>
         </div>
         <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.6;">
             * Si la catégorie existe déjà, le montant sera mis à jour.
         </p>
     </div>
 
-    <div class="grid" id="budgetList">
+    <h3 style="margin-top: 30px; margin-left: 5px;">Suivi de vos budgets</h3>
+    <div class="grid" id="budgetList" style="margin-top: 15px;">
         </div>
 </div>
 
