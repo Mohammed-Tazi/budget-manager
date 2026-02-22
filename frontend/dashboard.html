@@ -5,39 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Pro - Dashboard</title>
     <link rel="stylesheet" href="app.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-    <button class="mobile-nav-toggle" onclick="document.body.classList.toggle('nav-open')">☰</button>
-
     <div class="sidebar">
-        <div class="logo">
-            <h1>💎 Budget Pro</h1>
-        </div>
+        <h1>Budget Pro</h1>
         <nav>
-            <a href="dashboard.html" class="active">📊 Dashboard</a>
-            <a href="transactions.html">💸 Transactions</a>
-            <a href="budgets.html">🛡️ Budgets</a>
-            <a href="analytics.html">📈 Analytics</a>
-            <a href="goals.html">🎯 Goals</a>
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="transactions.html">Transactions</a>
+            <a href="budgets.html">Budgets</a>
+            <a href="analytics.html">Analytics</a>
+            <a href="goals.html">Goals</a>
         </nav>
-        <div class="sidebar-footer">v2.4.0 Premium</div>
     </div>
 
     <div class="main">
-        <header class="main-header">
-            <div>
-                <h2>Tableau de Bord</h2>
-                <p style="opacity: 0.7;">Aperçu global de votre santé financière.</p>
-            </div>
+        <header>
+            <h2>Tableau de Bord</h2>
+            <p style="opacity: 0.7;">Aperçu global de votre santé financière.</p>
         </header>
 
-        <div class="grid kpi-grid">
+        <div class="grid">
             <div class="card">
                 <span>Solde Total</span>
-                <div class="big" id="kpiTotal">...</div>
+                <div class="big" id="kpiTotal">Chargement...</div>
             </div>
             <div class="card">
                 <span>Revenus</span>
@@ -53,21 +44,21 @@
             </div>
         </div>
 
-        <div class="grid main-grid">
-            <div class="card chart-card">
+        <div class="grid">
+            <div class="card">
                 <h3>Flux Financier</h3>
-                <div style="height: 250px; width: 100%; position: relative;">
+                <div style="height: 250px; position: relative;">
                     <canvas id="flowChart"></canvas>
                 </div>
             </div>
 
             <div class="card">
                 <h3>Dernières Activités</h3>
-                <div id="txLive" class="activity-list">
-                    <p style="opacity:0.5; padding:20px;">Chargement...</p>
+                <div id="txLive">
+                    <p style="opacity:0.5; padding:20px;">Chargement des activités...</p>
                 </div>
                 <div style="margin-top: 15px; text-align: center;">
-                    <a href="transactions.html" class="btn-link">Voir tout l'historique →</a>
+                    <a href="transactions.html" style="font-size: 0.9em; color: #3b82f6; text-decoration: none;">Voir tout l'historique →</a>
                 </div>
             </div>
         </div>
