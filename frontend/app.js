@@ -1,86 +1,21 @@
 import { store } from "./store.js";
 
 // --- SUPPRESSION TRANSACTION ---
-// Correction : Support des IDs MongoDB (_id) ou standard (id)
 window.deleteTx = async function(id) {
     if (!id || id === 'undefined') return;
-    if (!confirm("Voulez-vous vraiment supprimer cette transaction ?")) return;
+    if (!confirm("Voulez-vous vraiment supprimer cet élément ?")) return;
     try {
         await store.deleteTransaction(id);
-        await init(); // Recharge les données et l'UI
+        await init(); 
     } catch (err) {
-        console.error("Erreur lors de la suppression:", err);
-        alert("Impossible de supprimer la transaction.");
-    }
-};
-
-// --- AJOUT TRANSACTION ---
-window.handleAdd = async function() {
-    const textEl = document.getElementById('text');
-    const amountEl = document.getElementById('amount');
-    const categoryEl = document.getElementById('category');
-    const typeEl = document.getElementById('type');
-
-    if (!textEl?.value || !amountEl?.value) {
-        return alert("Veuillez remplir le libellé et le montant.");
-    }
-
-    const data = {
-        text: textEl.value,
-        amount: Number(amountEl.value),
-        category: categoryEl?.value || "Général",
-        type: typeEl?.value || "expense"
-    };
-
-    try {
-        await store.saveTransaction(data);
-        // Nettoyage propre
-        textEl.value = "";
-        amountEl.value = "";
-        await init();
-    } catch (err) {
-        console.error("Erreur ajout:", err);
-    }
-};
-
-// --- ENREGISTRER UN OBJECTIF (GOAL) ---
-// Amélioration : Utilisation de sélecteurs ID plus robustes si possible
-window.handleSaveGoal = async function() {
-    const titleEl = document.getElementById('goalName'); // Recommandé d'ajouter ces IDs dans votre HTML
-    const targetEl = document.getElementById('goalTarget');
-    const currentEl = document.getElementById('goalCurrent');
-
-    // Fallback sur votre méthode querySelector si les IDs n'existent pas encore
-    const titleVal = titleEl?.value || document.querySelectorAll('.card input')[0]?.value;
-    const targetVal = targetEl?.value || document.querySelectorAll('.card input')[1]?.value;
-    const currentVal = currentEl?.value || document.querySelectorAll('.card input')[2]?.value;
-
-    if (!titleVal || !targetVal) {
-        return alert("Veuillez remplir le nom et le montant cible.");
-    }
-
-    try {
-        await store.saveGoal({
-            title: titleVal,
-            target: Number(targetVal),
-            current: Number(currentVal) || 0
-        });
-        alert("Objectif enregistré !");
-        
-        // Nettoyage via les éléments ou la boucle
-        if(titleEl) { titleEl.value = ""; targetEl.value = ""; currentEl.value = ""; }
-        else { document.querySelectorAll('.card input').forEach(input => input.value = ""); }
-        
-        await init();
-    } catch (err) {
-        console.error("Erreur objectif:", err);
+        console.error("Erreur suppression:", err);
+        alert("Action impossible.");
     }
 };
 
 // --- INITIALISATION GLOBALE ---
 async function init() {
     try {
-        // Chargement parallèle pour plus de rapidité
         await Promise.all([
             store.fetchTransactions(),
             store.fetchBudgets(),
@@ -91,12 +26,11 @@ async function init() {
         const budgets = store.budgets || [];
         const goals = store.goals || [];
 
-        // 2. Calculs des KPI
+        // 1. Calculs des KPI
         const income = tx.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
         const expense = tx.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
         const total = income - expense;
 
-        // Mise à jour sécurisée du DOM
         const updateText = (id, val) => {
             const el = document.getElementById(id);
             if (el) el.innerText = val;
@@ -106,17 +40,10 @@ async function init() {
         updateText("kpiIncome", `${income.toLocaleString()} MAD`);
         updateText("kpiExpense", `${expense.toLocaleString()} MAD`);
 
-        // Score financier
-        const scoreEl = document.getElementById("financeScore");
-        if (scoreEl) {
-            const score = income > 0 ? Math.max(0, Math.min(100, Math.round((total / income) * 100))) : 0;
-            scoreEl.innerText = `${score}/100`;
-            scoreEl.style.color = score > 70 ? "#1cc88a" : score > 40 ? "#f6c23e" : "#e74a3b";
-        }
+        // 2. Mise à jour des graphiques (via Analytics.js ou localement)
+        if (window.refreshCharts) window.refreshCharts();
 
-        updateChart(income, expense);
-
-        // 3. Rendu des listes (Budgets, Goals, Transactions)
+        // 3. Rendu des listes
         renderBudgetList(budgets, tx);
         renderGoalList(goals);
         renderTransactionList(tx);
@@ -126,35 +53,50 @@ async function init() {
     }
 }
 
-// --- FONCTIONS DE RENDU (Pour clarifier init) ---
+// --- FONCTIONS DE RENDU CORRIGÉES ---
 
-function renderBudgetList(budgets, tx) {
-    const el = document.getElementById("budgetList");
+function renderGoalList(goals) {
+    const el = document.getElementById("goalList");
     if (!el) return;
-    el.innerHTML = budgets.length === 0 ? 
-        '<p style="opacity:0.5; grid-column: 1/-1;">Aucun budget défini.</p>' : 
-        budgets.map(b => {
-            const spent = tx.filter(t => t.category === b.category && t.type === "expense")
-                            .reduce((s, t) => s + Number(t.amount), 0);
-            const progress = Math.min(100, (spent / b.limit) * 100);
+
+    el.innerHTML = goals.length === 0 ?
+        '<p style="opacity:0.5;">Aucun objectif défini.</p>' :
+        goals.map(g => {
+            const id = g._id || g.id; // Sécurité ID MongoDB
+            const name = g.title || g.name || "Objectif sans nom"; // Correction titre vide
+            const progress = Math.min(100, (Number(g.current) / Number(g.target)) * 100) || 0;
+
             return `
-                <div class="card">
+                <div class="card" style="position:relative; margin-bottom:15px;">
+                    <button onclick="handleDeleteGoal('${id}')" style="position:absolute; top:10px; right:10px; background:none; border:none; color:#e74a3b; cursor:pointer;">✕</button>
                     <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <strong>${b.category}</strong>
-                        <span>${spent} / ${b.limit} MAD</span>
+                        <strong>${name}</strong>
+                        <span>${g.current} / ${g.target} MAD</span>
                     </div>
-                    <div style="background:rgba(255,255,255,0.1); height:8px; border-radius:10px; overflow:hidden;">
-                        <div style="background:${progress > 90 ? '#e74a3b' : '#3b82f6'}; width:${progress}%; height:100%;"></div>
+                    <div style="background:rgba(255,255,255,0.1); height:10px; border-radius:10px; overflow:hidden;">
+                        <div style="background:#1cc88a; width:${progress}%; height:100%;"></div>
                     </div>
+                    <p style="font-size:11px; margin-top:5px; opacity:0.6;">${progress.toFixed(0)}% atteint</p>
                 </div>`;
         }).join("");
 }
+
+// Ajout de la fonction globale pour supprimer les objectifs
+window.handleDeleteGoal = async function(id) {
+    if (!confirm("Supprimer cet objectif ?")) return;
+    try {
+        await store.deleteGoal(id);
+        await init();
+    } catch (err) {
+        alert("Erreur lors de la suppression de l'objectif.");
+    }
+};
 
 function renderTransactionList(tx) {
     const el = document.getElementById("txList") || document.getElementById("txLive");
     if (!el) return;
     el.innerHTML = tx.length === 0 ? '<p style="opacity:0.5; padding:10px;">Aucune transaction.</p>' : 
-        tx.map(t => `
+        tx.slice().reverse().map(t => `
             <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05);">
                 <div>
                     <div style="font-weight:500;">${t.text}</div>
@@ -164,11 +106,11 @@ function renderTransactionList(tx) {
                     <b style="color:${t.type === 'income' ? '#1cc88a' : '#e74a3b'}">
                         ${t.type === 'income' ? '+' : '-'}${Math.abs(t.amount)}
                     </b>
-                    <button onclick="window.deleteTx('${t._id || t.id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer; padding:5px;">✕</button>
+                    <button onclick="window.deleteTx('${t._id || t.id}')" style="background:none; border:none; color:#e74a3b; cursor:pointer;">✕</button>
                 </div>
             </div>`).join("");
 }
 
-// Helper pour GoalList à ajouter selon le même modèle...
+// Gardez votre fonction renderBudgetList actuelle...
 
 document.addEventListener("DOMContentLoaded", init);
