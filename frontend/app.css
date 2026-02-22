@@ -480,3 +480,81 @@ body {
     border-color: var(--primary-blue);
     color: var(--primary-blue);
 }
+/* --- RESET & BASE --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-box-sizing: border-box;
+}
+
+body {
+    background-color: #0f172a; /* Fond très sombre uniforme */
+    color: white;
+    font-family: 'Inter', sans-serif;
+    display: flex; /* Utilise Flexbox pour aligner Sidebar et Main */
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* --- SIDEBAR FIX --- */
+.sidebar {
+    width: 260px;
+    background-color: #050a18; /* Plus sombre que le fond */
+    height: 100vh;
+    position: fixed; /* Reste à gauche */
+    left: 0;
+    top: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 100;
+}
+
+/* --- MAIN CONTENT FIX (Supprime la tache bleue) --- */
+.main {
+    flex: 1;
+    margin-left: 260px; /* Doit être égal à la largeur de la sidebar */
+    padding: 40px;
+    background: transparent; /* Empêche l'apparition de taches de couleur */
+    min-height: 100vh;
+    width: calc(100% - 260px);
+}
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
+    .sidebar {
+        left: -260px; /* Cache la sidebar sur mobile */
+        transition: 0.3s ease;
+    }
+
+    .main {
+        margin-left: 0; /* Prend tout l'écran sur mobile */
+        width: 100%;
+        padding: 20px;
+        padding-top: 80px; /* Laisse de la place pour le bouton ☰ */
+    }
+
+    /* Quand on clique sur le bouton ☰ */
+    body.nav-open .sidebar {
+        left: 0;
+    }
+
+    .mobile-nav-toggle {
+        display: block;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+}
+
+/* Cache le bouton toggle sur PC */
+@media (min-width: 769px) {
+    .mobile-nav-toggle {
+        display: none;
+    }
+}
