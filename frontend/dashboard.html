@@ -2,90 +2,46 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Pro - Dashboard</title>
     <link rel="stylesheet" href="app.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-<div class="sidebar">
-    <h1>Budget Pro</h1>
-  <nav>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="transactions.html">Transactions</a>
-    <a href="budgets.html">Budgets</a>
-    <a href="analytics.html">Analytics</a>
-    <a href="goals.html">Goals</a>
-</nav>
-</div>
-
-<div class="main">
-    <header>
-        <h2>Centre financier intelligent</h2>
-        <p id="currentDate" style="opacity: 0.7;"></p>
-    </header>
-
-    <div class="card" style="margin-bottom: 20px;">
-        <h3>Ajouter une opération</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
-            <input type="text" id="text" placeholder="Ex: Courses" style="padding: 10px; border-radius: 5px; border: 1px solid #444; background: #222; color: white;">
-            <input type="number" id="amount" placeholder="Montant (MAD)" style="padding: 10px; border-radius: 5px; border: 1px solid #444; background: #222; color: white;">
-            <select id="category" style="padding: 10px; border-radius: 5px; border: 1px solid #444; background: #222; color: white;">
-                <option value="Alimentation">Alimentation</option>
-                <option value="Loisirs">Loisirs</option>
-                <option value="Salaire">Salaire</option>
-                <option value="Transport">Transport</option>
-            </select>
-            <button onclick="handleAdd()" style="background: var(--accent, #6366f1); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Ajouter</button>
+    <div class="sidebar">
+        <h1>Budget Pro</h1>
+        <nav>
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="transactions.html">Transactions</a>
+            <a href="budgets.html">Budgets</a>
+            <a href="analytics.html">Analytics</a>
+            <a href="goals.html">Goals</a>
+        </nav>
+    </div>
+    <div class="main">
+        <div class="card">
+            <h3>Ajouter une opération</h3>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <input type="text" id="text" placeholder="Ex: Courses">
+                <input type="number" id="amount" placeholder="Montant">
+                <select id="category">
+                    <option value="Alimentation">Alimentation</option>
+                    <option value="Salaire">Salaire</option>
+                    <option value="Loisirs">Loisirs</option>
+                </select>
+                <button onclick="handleAdd()">Ajouter</button>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="card"><span>Solde Total</span><div class="big" id="kpiTotal">0 MAD</div></div>
+            <div class="card"><span>Revenus</span><div class="big" id="kpiIncome" style="color:#1cc88a">0</div></div>
+            <div class="card"><span>Dépenses</span><div class="big" id="kpiExpense" style="color:#e74a3b">0</div></div>
+            <div class="card"><span>Score Santé</span><div class="big" id="financeScore">0/100</div></div>
+        </div>
+        <div class="card">
+            <h3>Flux Financier</h3>
+            <div style="height: 250px;"><canvas id="flowChart"></canvas></div>
         </div>
     </div>
-
-    <div class="grid">
-        <div class="card">
-            <span class="label">Solde Total</span>
-            <div class="big" id="kpiTotal">0 MAD</div>
-        </div>
-        <div class="card">
-            <span class="label">Revenus</span>
-            <div class="big text-success" id="kpiIncome">0</div>
-        </div>
-        <div class="card">
-            <span class="label">Dépenses</span>
-            <div class="big text-danger" id="kpiExpense">0</div>
-        </div>
-        <div class="card">
-            <span class="label">Score Santé</span>
-            <div class="big" id="financeScore">--/100</div>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>Transactions en direct</h3>
-        <div id="txLive" class="list-container">
-            <p style="opacity:0.5; padding:15px;">Chargement des données...</p>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', { 
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-    });
-
-    // Fonction de pont entre le bouton HTML et ton script module
-    function handleAdd() {
-        const data = {
-            text: document.getElementById('text').value,
-            amount: document.getElementById('amount').value,
-            category: document.getElementById('category').value,
-            type: document.getElementById('category').value === 'Salaire' ? 'income' : 'expense'
-        };
-        window.addTransaction(data);
-    }
-</script>
-
-<script type="module" src="app.js"></script>
-
+    <script type="module" src="app.js"></script>
 </body>
 </html>
