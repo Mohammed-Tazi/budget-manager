@@ -623,3 +623,67 @@ body {
         display: none !important;
     }
 }
+/* --- CONFIGURATION RESPONSIVE --- */
+
+@media (max-width: 768px) {
+    /* 1. On transforme la sidebar en barre horizontale en haut */
+    .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 10px 0 !important;
+        z-index: 9999 !important;
+    }
+
+    /* On aligne le logo et les liens horizontalement */
+    .sidebar .logo {
+        display: none; /* On cache le logo pour gagner de la place sur mobile */
+    }
+
+    .sidebar nav {
+        display: flex !important;
+        flex-direction: row !important; /* Liens côte à côte */
+        justify-content: space-around !important;
+        align-items: center !important;
+    }
+
+    .sidebar nav a {
+        font-size: 12px !important;
+        padding: 5px !important;
+        margin: 0 !important;
+    }
+
+    .sidebar-footer {
+        display: none !important; /* Cache la version v2.4.0 sur mobile */
+    }
+
+    /* 2. On ajuste le contenu principal pour qu'il commence sous la barre */
+    .main {
+        margin-left: 0 !important; /* Supprime la tache bleue/vide de gauche */
+        width: 100% !important;
+        padding: 15px !important;
+        padding-top: 80px !important; /* Espace pour ne pas être caché sous le menu */
+    }
+
+    /* 3. On empile les éléments du formulaire d'ajout */
+    .transaction-form, 
+    div[style*="display: flex"] { 
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    input, select, button {
+        width: 100% !important;
+        min-width: 100% !important;
+        margin: 5px 0 !important;
+    }
+
+    /* On cache le bouton burger s'il existe car le menu est déjà là */
+    .mobile-nav-toggle {
+        display: none !important;
+    }
+}
