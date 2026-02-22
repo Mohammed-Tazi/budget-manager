@@ -9,7 +9,8 @@ app.use(express.json());
 app.use(cors());
 
 // --- CONNEXION MONGODB ATLAS ---
-const MONGO_URI = "mongodb+srv://Mohammedtazix:8Db9016f@cluster0.zqd3ws4.mongodb.net/budgetDB?retryWrites=true&w=majority&appName=Cluster0";
+// Utilisation de process.env pour la sécurité sur Vercel
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://Mohammedtazix:8Db9016f@cluster0.zqd3ws4.mongodb.net/budgetDB?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log("✅ RÉUSSI : Connecté au Cloud MongoDB Atlas !"))
@@ -53,8 +54,10 @@ app.post('/api/transactions', async (req, res) => {
 });
 
 app.delete('/api/transactions/:id', async (req, res) => {
-    await Transaction.findByIdAndDelete(req.params.id);
-    res.json({ message: "Supprimé" });
+    try {
+        await Transaction.findByIdAndDelete(req.params.id);
+        res.json({ message: "Supprimé" });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // Budgets
@@ -69,6 +72,12 @@ app.post('/api/budgets', async (req, res) => {
 app.get('/api/goals', async (req, res) => res.json(await Goal.find()));
 app.post('/api/goals', async (req, res) => res.json(await new Goal(req.body).save()));
 
-// Lancement
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Serveur en ligne sur le port ${PORT}`));
+// --- AJUSTEMENT POUR VERCEL ---
+// Important : On exporte l'application pour que Vercel puisse la gérer
+module.exports = app;
+
+// Le serveur ne doit faire "listen" que si on n'est pas sur Vercel
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`🚀 Serveur local sur le port ${PORT}`));
+}
